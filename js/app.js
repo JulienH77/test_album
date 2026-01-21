@@ -59,15 +59,38 @@ function trajetStyle(feature) {
 // ======================================================
 // SHOW TRAJETS FOR ONE TRIP
 // ======================================================
+// Exemple : Fonction pour afficher les trajets d'un voyage
 function showTrajetsForTrip(trip) {
-  trajetLayer.clearLayers();
-  if (!trajetsGeoJSON) return;
-
-  L.geoJSON(trajetsGeoJSON, {
-    style: trajetStyle,
-    filter: f => f.properties.voyage === trip.name
-  }).addTo(trajetLayer);
+  const trajetsFiltres = trajetsGeoJSON.features.filter(
+    feature => feature.properties.voyage === trip
+  );
+  // Efface les couches existantes si nécessaire
+  if (window.trajetsLayer) {
+    map.removeLayer(window.trajetsLayer);
+  }
+  // Ajoute les trajets filtrés à la carte
+  window.trajetsLayer = L.geoJSON(trajetsFiltres, {
+    style: function(feature) {
+      // Style personnalisé (couleur, épaisseur, etc.)
+      return { color: trajetStyle(feature.properties.trajet) };
+    },
+    onEachFeature: function(feature, layer) {
+      // Ajoute une popup avec les infos du trajet
+      layer.bindPopup(`
+        <b>Voyage</b>: ${feature.properties.voyage}<br>
+        <b>Trajet</b>: ${feature.properties.trajet}<br>
+        <b>Date</b>: ${feature.properties.date_deb} → ${feature.properties.date_fin}<br>
+        <b>Durée</b>: ${feature.properties.duree}<br>
+        <b>Distance</b>: ${feature.properties.distanceKM} km
+      `);
+    }
+  }).addTo(map);
 }
+
+
+
+
+
 
 // ======================================================
 // SHOW CITIES (points + labels)
