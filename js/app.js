@@ -7,13 +7,38 @@ const state = {
 };
 
 // ======================================================
-// INIT MAP
+// INIT MAP & LAYERS
 // ======================================================
-const map = L.map("map").setView([20, 0], 2);
-
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap"
-}).addTo(map);
+});
+
+const googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+  maxZoom: 20,
+  subdomains:['mt0','mt1','mt2','mt3'],
+  attribution: "© Google Maps"
+});
+
+const googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+  maxZoom: 20,
+  subdomains:['mt0','mt1','mt2','mt3'],
+  attribution: "© Google Maps"
+});
+
+const map = L.map("map", {
+  center: [20, 0],
+  zoom: 2,
+  layers: [osm] // Fond par défaut
+});
+
+const baseMaps = {
+  "OpenStreetMap": osm,
+  "Google Satellite": googleSat,
+  "Google Street": googleStreets
+};
+
+L.control.layers(baseMaps).addTo(map);
+L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
 
 // ======================================================
 // LEAFLET LAYERS (ordre important)
@@ -174,100 +199,111 @@ function selectTrip(trip, li) {
 }
 
 // ======================================================
-// RENDER CITIES SIDEBAR
+// RENDER CITIES SIDEBAR (Version Accordéon)
 // ======================================================
 function renderCities() {
   contentEl.innerHTML = "";
 
   state.selectedTrip.cities.forEach(city => {
-    const cityDiv = document.createElement("div");
-    cityDiv.className = "city";
-    cityDiv.dataset.city = city.id;
+    // Conteneur global de la ville (Card + Galerie)
+    const cityWrapper = document.createElement("div");
+    cityWrapper.className = "city-wrapper";
+    cityWrapper.id = `wrapper-${city.id}`;
 
-    const header = document.createElement("div");
-    header.className = "city-header";
-    header.textContent = city.name;
+    // La carte visuelle
+    const cityCard = document.createElement("div");
+    cityCard.className = "city-card";
+    const imgPath = `data/IMG/VillesVisitees/${city.id}.jpg`;
+    cityCard.style.backgroundImage = `url('${imgPath}')`;
 
-    header.addEventListener("click", () => toggleCity(city, cityDiv));
+    cityCard.innerHTML = `
+      <div class="city-overlay"></div>
+      <span class="city-name">${city.name}</span>
+    `;
 
-    cityDiv.appendChild(header);
-    contentEl.appendChild(cityDiv);
+    // Zone où la galerie apparaîtra
+    const galleryContainer = document.createElement("div");
+    galleryContainer.className = "city-gallery-container";
+    galleryContainer.id = `gallery-${city.id}`;
+
+    cityCard.addEventListener("click", () => toggleCity(city));
+
+    cityWrapper.appendChild(cityCard);
+    cityWrapper.appendChild(galleryContainer);
+    contentEl.appendChild(cityWrapper);
   });
 }
 
 // ======================================================
-// TOGGLE CITY
+// TOGGLE CITY (Avec repli et défilement)
 // ======================================================
-function toggleCity(city, cityDiv) {
+function toggleCity(city) {
+  const wrapper = document.getElementById(`wrapper-${city.id}`);
+  const galleryDiv = document.getElementById(`gallery-${city.id}`);
+  
+  // Si on clique sur la ville déjà ouverte : on replie tout et on arrête
   if (state.selectedCity?.id === city.id) {
     closeCities();
     showCities(state.selectedTrip);
     return;
   }
 
+  // 1. Fermer les autres galeries
   closeCities();
   state.selectedCity = city;
 
-  // 🔴 enlever les points des villes
+  // 2. Mise à jour visuelle de la carte (Marqueurs rouges)
   cityLayer.clearLayers();
   photoLayer.clearLayers();
 
-  // 🟢 afficher les photos sur la carte
   city.days.forEach(day => {
     day.photos.forEach(photo => {
       if (!photo.coords) return;
-
-      const marker = L.circleMarker(
-        [photo.coords[1], photo.coords[0]],
-        {
-          radius: 6,
-          fillColor: "#ffcc00",
-          fillOpacity: 1,
-          color: "#000",
-          weight: 2
-        }
-      );
-
+      const marker = L.circleMarker([photo.coords[1], photo.coords[0]], {
+        radius: 6,
+        fillColor: "#ff0000", // Rouge
+        fillOpacity: 1,
+        color: "#000000",      // Contour noir
+        weight: 2
+      });
       marker.on("click", () => openPhotoPopup(photo));
       photoLayer.addLayer(marker);
     });
   });
 
-  // galerie sidebar
-  const gallery = document.createElement("div");
-  gallery.className = "city-gallery";
+  // 3. Remplissage et ouverture de la galerie
+  const galleryHTML = city.days.map(day => `
+    <div class="day-block">
+      <div class="day-title">${formatDate(day.date)}</div>
+      <div class="photo-grid">
+        ${day.photos.map(photo => `
+          <div class="photo-item">
+            <img src="${photo.src}" onclick='openPhotoPopup(${JSON.stringify(photo)})'>
+            <div class="photo-desc">${photo.desc || ""}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
 
-  city.days.forEach(day => {
-    const dayBlock = document.createElement("div");
-    dayBlock.className = "day-block";
+  galleryDiv.innerHTML = galleryHTML;
+  galleryDiv.classList.add("active");
 
-    const title = document.createElement("div");
-    title.className = "day-title";
-    title.textContent = formatDate(day.date);
-    dayBlock.appendChild(title);
+  // 4. Remonter la ville en haut de la sidebar
+  setTimeout(() => {
+    wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 300); // Petit délai pour laisser l'animation de dépliage commencer
 
-    day.photos.forEach(photo => {
-      const item = document.createElement("div");
-      item.className = "photo-item";
-
-      const img = document.createElement("img");
-      img.src = photo.src;
-      img.addEventListener("click", () => openPhotoPopup(photo));
-
-      const desc = document.createElement("div");
-      desc.className = "photo-desc";
-      desc.textContent = photo.desc;
-
-      item.appendChild(img);
-      item.appendChild(desc);
-      dayBlock.appendChild(item);
-    });
-
-    gallery.appendChild(dayBlock);
-  });
-
-  cityDiv.appendChild(gallery);
   zoomOnCity(city);
+}
+
+function closeCities() {
+  document.querySelectorAll(".city-gallery-container").forEach(el => {
+    el.classList.remove("active");
+    el.innerHTML = "";
+  });
+  state.selectedCity = null;
+  photoLayer.clearLayers();
 }
 
 // ======================================================
