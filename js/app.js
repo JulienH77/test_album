@@ -64,6 +64,7 @@ function showTrajetsForTrip(trip) {
   const trajetsFiltres = trajetsGeoJSON.features.filter(
     feature => feature.properties.voyage === trip
   );
+      console.log("Trajets filtrés :", trajetsFiltres); // Vérifie le résultat du filtre
   // Efface les couches existantes si nécessaire
   if (window.trajetsLayer) {
     map.removeLayer(window.trajetsLayer);
