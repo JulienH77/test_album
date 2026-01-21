@@ -27,7 +27,7 @@ const photoLayer  = L.layerGroup().addTo(map); // pas encore utilisé
 // ======================================================
 let trajetsGeoJSON = null;
 
-fetch("GEOJSON/TRAJETS_ALL_vacances_wgs.geojson")
+fetch("data/GEOJSON/TRAJETS_ALL_vacances_wgs.geojson")
   .then(r => {
     if (!r.ok) throw new Error("HTTP " + r.status);
     return r.json();
