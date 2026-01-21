@@ -2,7 +2,7 @@ const travels = [
   {
     year: 2025,
     id: "2025_china",
-    name: "2025 – China",
+    name: "May 2025 - China",
     cities: [
       {
         id: "beijing",
@@ -96,7 +96,7 @@ const travels = [
   {
     year: 2025,
     id: "2025_central_europe",
-    name: "2025 – Central Europe",
+    name: "July 2025 - Central Europe",
     cities: [
       { id: "munich", name: "Munich", lat: 48.1351, lng: 11.5820, days: [] },
       { id: "marquartstein", name: "Marquartstein", lat: 47.7616, lng: 12.4623, days: [] },
@@ -111,7 +111,7 @@ const travels = [
   {
     year: 2025,
     id: "2025_australia",
-    name: "2025 – Australia",
+    name: "December 2025 - Australia",
     cities: [
       { id: "adelaide", name: "Adelaide", lat: -34.9285, lng: 138.6007, days: [] },
       { id: "hahndorf", name: "Hahndorf", lat: -35.0292, lng: 138.8076, days: [] }
