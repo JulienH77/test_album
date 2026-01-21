@@ -59,33 +59,40 @@ function trajetStyle(feature) {
 // ======================================================
 // SHOW TRAJETS FOR ONE TRIP
 // ======================================================
-// Exemple : Fonction pour afficher les trajets d'un voyage
 function showTrajetsForTrip(trip) {
-  const trajetsFiltres = trajetsGeoJSON.features.filter(
-    feature => feature.properties.voyage === trip
-  );
-      console.log("Trajets filtrés :", trajetsFiltres); // Vérifie le résultat du filtre
-  // Efface les couches existantes si nécessaire
-  if (window.trajetsLayer) {
-    map.removeLayer(window.trajetsLayer);
+  // 1. On vide le groupe de calques existant (trajetLayer est défini en haut de votre fichier)
+  trajetLayer.clearLayers();
+
+  if (!trajetsGeoJSON) {
+    console.error("Les données GeoJSON ne sont pas encore chargées.");
+    return;
   }
-  // Ajoute les trajets filtrés à la carte
-  window.trajetsLayer = L.geoJSON(trajetsFiltres, {
+
+  // 2. FILTRE : On compare l'ID du voyage (ou le name selon votre GeoJSON)
+  // Vérifiez si votre GeoJSON utilise l'ID (2025_china) ou le nom (May 2025 - China)
+  const trajetsFiltres = trajetsGeoJSON.features.filter(
+    feature => feature.properties.voyage === trip.id || feature.properties.voyage === trip.name
+  );
+
+  console.log("Trajets trouvés pour " + trip.name + " :", trajetsFiltres.length);
+
+  // 3. AJOUT À LA CARTE
+  const geojsonLayer = L.geoJSON(trajetsFiltres, {
     style: function(feature) {
-      // Style personnalisé (couleur, épaisseur, etc.)
-      return { color: trajetStyle(feature.properties.trajet) };
+      // On passe l'objet feature complet ici
+      return trajetStyle(feature);
     },
     onEachFeature: function(feature, layer) {
-      // Ajoute une popup avec les infos du trajet
       layer.bindPopup(`
         <b>Voyage</b>: ${feature.properties.voyage}<br>
-        <b>Trajet</b>: ${feature.properties.trajet}<br>
-        <b>Date</b>: ${feature.properties.date_deb} → ${feature.properties.date_fin}<br>
-        <b>Durée</b>: ${feature.properties.duree}<br>
-        <b>Distance</b>: ${feature.properties.distanceKM} km
+        <b>Mode</b>: ${feature.properties.trajet}<br>
+        <b>Distance</b>: ${feature.properties.distanceKM || '?'} km
       `);
     }
-  }).addTo(map);
+  });
+
+  // On ajoute le geojson au groupe trajetLayer
+  trajetLayer.addLayer(geojsonLayer);
 }
 
 
