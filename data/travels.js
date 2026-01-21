@@ -1,0 +1,120 @@
+const travels = [
+  {
+    year: 2025,
+    id: "2025_china",
+    name: "2025 – China",
+    cities: [
+      {
+        id: "beijing",
+        name: "Beijing",
+        lat: 39.9042,
+        lng: 116.4074,
+        days: []
+      },
+      {
+        id: "xian",
+        name: "Xi'an",
+        lat: 34.3416,
+        lng: 108.9398,
+        days: []
+      },
+      {
+        id: "shanghai",
+        name: "Shanghai",
+        lat: 31.2304,
+        lng: 121.4737,
+        days: [
+          {
+            date: "2025-05-19",
+            photos: [
+              {
+                src: "data/IMG/2025/China/Shanghai/IMG_20250519_221420.jpg",
+                desc: "Vue nocturne de Shanghai",
+				coords: [121.486234, 31.240105]
+              }
+            ]
+          },
+          {
+            date: "2025-05-20",
+            photos: [
+              {
+                src: "data/IMG/2025/China/Shanghai/IMG_20250520_190612.jpg",
+                desc: "Balade en soirée",
+				coords: [121.186234, 31.240105]
+              }
+            ]
+          },
+          {
+            date: "2025-05-22",
+            photos: [
+              {
+                src: "data/IMG/2025/China/Shanghai/IMG_20250522_115838.jpg",
+                desc: "Quartier historique",
+				coords: [121.386234, 31.740105]
+
+              },
+              {
+                src: "data/IMG/2025/China/Shanghai/IMG_20250522_170926.jpg",
+                desc: "Fin d’après-midi en ville",
+				coords: [121.436234, 31.40105]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: "hangzhou",
+        name: "Hangzhou",
+        lat: 30.2741,
+        lng: 120.1551,
+        days: []
+      },
+      {
+        id: "guilin",
+        name: "Guilin",
+        lat: 25.2736,
+        lng: 110.2900,
+        days: []
+      },
+      {
+        id: "yangshuo",
+        name: "Yangshuo",
+        lat: 24.7786,
+        lng: 110.4966,
+        days: []
+      },
+      {
+        id: "tianjin",
+        name: "Tianjin",
+        lat: 39.0842,
+        lng: 117.2000,
+        days: []
+      }
+    ]
+  },
+
+  {
+    year: 2025,
+    id: "2025_central_europe",
+    name: "2025 – Central Europe",
+    cities: [
+      { id: "munich", name: "Munich", lat: 48.1351, lng: 11.5820, days: [] },
+      { id: "marquartstein", name: "Marquartstein", lat: 47.7616, lng: 12.4623, days: [] },
+      { id: "salzburg", name: "Salzburg", lat: 47.8095, lng: 13.0550, days: [] },
+      { id: "budapest", name: "Budapest", lat: 47.4979, lng: 19.0402, days: [] },
+      { id: "prague", name: "Prague", lat: 50.0755, lng: 14.4378, days: [] },
+      { id: "regensburg", name: "Regensburg", lat: 49.0134, lng: 12.1016, days: [] },
+      { id: "ulm", name: "Ulm", lat: 48.4011, lng: 9.9876, days: [] }
+    ]
+  },
+
+  {
+    year: 2025,
+    id: "2025_australia",
+    name: "2025 – Australia",
+    cities: [
+      { id: "adelaide", name: "Adelaide", lat: -34.9285, lng: 138.6007, days: [] },
+      { id: "hahndorf", name: "Hahndorf", lat: -35.0292, lng: 138.8076, days: [] }
+    ]
+  }
+];
