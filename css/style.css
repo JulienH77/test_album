@@ -96,6 +96,15 @@ body {
   cursor: pointer;
   transition: transform 0.15s;
 }
+.city-label span {
+  background: rgba(0,0,0,0.6);
+  color: white;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 .day-block {
   margin-bottom: 16px;
 }

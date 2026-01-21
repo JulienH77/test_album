@@ -18,9 +18,9 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 // ======================================================
 // LEAFLET LAYERS (ordre important)
 // ======================================================
-const trajetLayer = L.layerGroup().addTo(map); // en dessous
-const cityLayer   = L.layerGroup().addTo(map); // au dessus
-const photoLayer  = L.layerGroup().addTo(map); // pas encore utilisé
+const trajetLayer = L.layerGroup().addTo(map);
+const cityLayer   = L.layerGroup().addTo(map);
+const photoLayer  = L.layerGroup().addTo(map);
 
 // ======================================================
 // LOAD TRAJETS GEOJSON
@@ -66,16 +66,17 @@ function showTrajetsForTrip(trip) {
   L.geoJSON(trajetsGeoJSON, {
     style: trajetStyle,
     filter: f => f.properties.voyage === trip.name
-  }).eachLayer(l => trajetLayer.addLayer(l));
+  }).addTo(trajetLayer);
 }
 
 // ======================================================
-// SHOW CITIES
+// SHOW CITIES (points + labels)
 // ======================================================
 function showCities(trip) {
   cityLayer.clearLayers();
 
   trip.cities.forEach(city => {
+    // point
     const marker = L.circleMarker([city.lat, city.lng], {
       radius: 7,
       fillColor: "#fff",
@@ -84,12 +85,24 @@ function showCities(trip) {
       weight: 3
     });
 
+    // label
+    const label = L.marker([city.lat, city.lng], {
+      icon: L.divIcon({
+        className: "city-label",
+        html: `<span>${city.name}</span>`,
+        iconSize: [120, 24],
+        iconAnchor: [60, 36]
+      }),
+      interactive: false
+    });
+
     marker.on("click", () => {
       const cityDiv = document.querySelector(`[data-city="${city.id}"]`);
       toggleCity(city, cityDiv);
     });
 
     cityLayer.addLayer(marker);
+    cityLayer.addLayer(label);
   });
 }
 
@@ -105,7 +118,6 @@ const contentEl  = document.getElementById("content-section");
 travels.forEach(trip => {
   const li = document.createElement("li");
   li.textContent = trip.name;
-
   li.addEventListener("click", () => selectTrip(trip, li));
   tripListEl.appendChild(li);
 });
@@ -122,6 +134,7 @@ function selectTrip(trip, li) {
   li.classList.add("active");
 
   contentEl.innerHTML = "";
+  photoLayer.clearLayers();
 
   showTrajetsForTrip(trip);
   showCities(trip);
@@ -157,12 +170,39 @@ function renderCities() {
 function toggleCity(city, cityDiv) {
   if (state.selectedCity?.id === city.id) {
     closeCities();
+    showCities(state.selectedTrip);
     return;
   }
 
   closeCities();
   state.selectedCity = city;
 
+  // 🔴 enlever les points des villes
+  cityLayer.clearLayers();
+  photoLayer.clearLayers();
+
+  // 🟢 afficher les photos sur la carte
+  city.days.forEach(day => {
+    day.photos.forEach(photo => {
+      if (!photo.coords) return;
+
+      const marker = L.circleMarker(
+        [photo.coords[1], photo.coords[0]],
+        {
+          radius: 6,
+          fillColor: "#ffcc00",
+          fillOpacity: 1,
+          color: "#000",
+          weight: 2
+        }
+      );
+
+      marker.on("click", () => openPhotoPopup(photo));
+      photoLayer.addLayer(marker);
+    });
+  });
+
+  // galerie sidebar
   const gallery = document.createElement("div");
   gallery.className = "city-gallery";
 
@@ -205,52 +245,54 @@ function toggleCity(city, cityDiv) {
 function closeCities() {
   document.querySelectorAll(".city-gallery").forEach(el => el.remove());
   state.selectedCity = null;
+  photoLayer.clearLayers();
 }
 
 // ======================================================
 // MAP HELPERS
 // ======================================================
 function zoomToTrip(trip) {
-  const bounds = L.latLngBounds(
-    trip.cities.map(c => [c.lat, c.lng])
-  );
-  map.fitBounds(bounds.pad(0.3));
+  map.fitBounds(trip.cities.map(c => [c.lat, c.lng]), { padding: [40, 40] });
 }
 
 function zoomOnCity(city) {
-  map.setView([city.lat, city.lng], 10);
+  map.setView([city.lat, city.lng], 12);
 }
 
 // ======================================================
-// PHOTO POPUP
+// PHOTO POPUP + FULLSCREEN
 // ======================================================
 function openPhotoPopup(photo) {
-  if (!photo.coords) return;
-
-  const dateObj = extractDateFromFilename(photo.src);
-  const formattedDate = dateObj
-    ? dateObj.toLocaleString("fr-FR", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit"
-      })
-    : "";
+  const d = extractDateFromFilename(photo.src);
+  const dateStr = d ? d.toLocaleString("fr-FR") : "";
 
   const html = `
     <div class="leaflet-photo-popup">
-      <div class="popup-desc">${photo.desc}</div>
-      <img src="${photo.src}" style="width:100%;margin-top:6px;">
-      <div class="popup-date">${formattedDate}</div>
+      <div class="popup-desc">${photo.desc || ""}</div>
+      <div class="popup-img-wrapper">
+        <img src="${photo.src}">
+        <button class="popup-fullscreen-btn"
+          onclick="openFullscreen('${photo.src}')">⤢</button>
+      </div>
+      <div class="popup-date">${dateStr}</div>
     </div>
   `;
 
-  L.popup({ maxWidth: 400 })
+  L.popup({ maxWidth: 420 })
     .setLatLng([photo.coords[1], photo.coords[0]])
     .setContent(html)
     .openOn(map);
+}
+
+function openFullscreen(src) {
+  const overlay = document.getElementById("fullscreenOverlay");
+  const img = document.getElementById("fullscreenImg");
+  img.src = src;
+  overlay.style.display = "flex";
+}
+
+function closeFullscreen() {
+  document.getElementById("fullscreenOverlay").style.display = "none";
 }
 
 // ======================================================
@@ -267,6 +309,5 @@ function formatDate(dateStr) {
 function extractDateFromFilename(src) {
   const m = src.match(/IMG_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
   if (!m) return null;
-  const [, y, mo, d, h, mi, s] = m;
-  return new Date(`${y}-${mo}-${d}T${h}:${mi}:${s}`);
+  return new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}`);
 }
