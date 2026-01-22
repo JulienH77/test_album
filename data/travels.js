@@ -9,7 +9,62 @@ const travels = [
         name: "Beijing",
         lat: 39.9042,
         lng: 116.4074,
-        days: []
+        days: [
+          {
+            date: "2025-05-12",
+            photos: [
+				{src: "data/IMG/2025/China/Beijing/IMG_20250512_130110.jpg",
+				desc: "ahahahah ahhahah ah ah hah ahah 1",
+				coords: [121.486234, 31.240105]
+              },
+				{
+                src: "data/IMG/2025/China/Beijing/IMG_20250512_140556.jpg",
+                desc: "ahahah hah ahah 2",
+				coords: [121.486234, 31.240105]
+              },
+				{
+                src: "data/IMG/2025/China/Beijing/IMG_20250512_141016.jpg",
+                desc: "ahaha ahah 3",
+				coords: [121.486234, 31.240105]
+              },
+				{
+                src: "data/IMG/2025/China/Beijing/IMG_20250512_141348.jpg",
+                desc: "ahahahah ahhahah ah ah hah ahah 4",
+				coords: [121.486234, 31.240105]
+              },
+				{
+                src: "data/IMG/2025/China/Beijing/IMG_20250512_141844.jpg",
+                desc: "ahahahah ahhahah ah ah hah ahah 5",
+				coords: [121.486234, 31.240105]
+              },
+				{
+                src: "data/IMG/2025/China/Beijing/IMG_20250512_142025.jpg",
+                desc: "ahahahah ahhahah ah ah hah ahah 6",
+				coords: [121.486234, 31.240105]
+              },
+				{
+                src: "data/IMG/2025/China/Beijing/IMG_20250512_143901.jpg",
+                desc: "ahahahah ahhahah ah ah hah ahah 7",
+				coords: [121.486234, 31.240105]
+              },
+				{
+                src: "data/IMG/2025/China/Beijing/IMG_20250512_150859.jpg",
+                desc: "ahahahah ahhahah ah ah hah ahah 8",
+				coords: [121.486234, 31.240105]
+              },
+				{
+                src: "data/IMG/2025/China/Beijing/IMG_20250512_152823.jpg",
+                desc: "ahahahah ahhahah ah ah hah ahah 9",
+				coords: [121.486234, 31.240105]
+              },
+				{
+                src: "data/IMG/2025/China/Beijing/IMG_20250512_153650.jpg",
+                desc: "ahahahah ahhahah ah ah hah ahah 10",
+				coords: [121.486234, 31.240105]
+              },
+            ]
+          }
+		  ]
       },
       {
         id: "xian",
@@ -54,8 +109,38 @@ const travels = [
 
               },
               {
-                src: "data/IMG/2025/China/Shanghai/IMG_20250522_170926.jpg",
+                src: "data/IMG/2025/China/Shanghai/IMG_20250522_121420.jpg",
                 desc: "Fin d’après-midi en ville",
+				coords: [121.436234, 31.40105]
+              },
+              {
+                src: "data/IMG/2025/China/Shanghai/IMG_20250522_123517.jpg",
+                desc: "Fin didi en ville",
+				coords: [121.436234, 31.40105]
+              },
+              {
+                src: "data/IMG/2025/China/Shanghai/IMG_20250522_125147.jpg",
+                desc: "d’après-midi en ville",
+				coords: [121.436234, 31.40105]
+              },
+              {
+                src: "data/IMG/2025/China/Shanghai/IMG_20250522_164733.jpg",
+                desc: "Fin s-midi en ville",
+				coords: [121.436234, 31.40105]
+              },
+              {
+                src: "data/IMG/2025/China/Shanghai/IMG_20250522_170254.jpg",
+                desc: "Fin d’ape",
+				coords: [121.436234, 31.40105]
+              },
+              {
+                src: "data/IMG/2025/China/Shanghai/IMG_20250522_170749.jpg",
+                desc: "F-midi en ville",
+				coords: [121.436234, 31.40105]
+              },
+              {
+                src: "data/IMG/2025/China/Shanghai/IMG_20250522_170926.jpg",
+                desc: "Fin d’ae",
 				coords: [121.436234, 31.40105]
               }
             ]
