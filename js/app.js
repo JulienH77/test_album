@@ -236,59 +236,94 @@ function renderCities() {
 }
 
 // ======================================================
-// TOGGLE CITY (Séparé par date + Grille 2 colonnes)
+// TOGGLE CITY (AUTO-SORT & LAZY LOAD)
 // ======================================================
 function toggleCity(city) {
   const galleryDiv = document.getElementById(`gallery-${city.id}`);
   const wrapper = document.getElementById(`wrapper-${city.id}`);
   
-  // Vérification si on clique sur la même ville
+  // Si c'est déjà la ville active, on ne fait rien (car closeCities a déjà tout fermé juste avant si besoin)
+  // Note : j'ai simplifié la logique d'ouverture/fermeture pour être plus robuste
   const isSameCity = (state.selectedCity && state.selectedCity.id === city.id);
 
-  // 1. RESET COMPLET
   closeCities(); 
 
-  // Si c'était la même ville, on a tout fermé, on s'arrête.
-  if (isSameCity) {
-    return;
-  }
+  if (isSameCity) return;
 
-  // 2. NOUVELLE SÉLECTION
   state.selectedCity = city;
 
-  // Masquer les points blancs des villes
-  if (map.hasLayer(cityLayer)) {
-    map.removeLayer(cityLayer);
-  }
+  // Masquer les points blancs
+  if (map.hasLayer(cityLayer)) map.removeLayer(cityLayer);
   map.closePopup();
 
-  // 3. AFFICHER LES PHOTOS SUR LA CARTE (POINTS ROUGES)
-  city.days.forEach(day => {
-    day.photos.forEach(photo => {
-      if (!photo.coords) return;
-      
-      const marker = L.circleMarker([photo.coords[1], photo.coords[0]], {
-        radius: 7,
-        fillColor: "#ff0000", // Rouge
-        fillOpacity: 1,
-        color: "#000",
-        weight: 2
-      });
-      
-      marker.on("click", () => openPhotoPopup(photo));
-      photoLayer.addLayer(marker);
+  // ------------------------------------------------------
+  // LE COEUR DU SYSTÈME : TRAITEMENT AUTOMATIQUE
+  // ------------------------------------------------------
+  
+  // 1. On récupère la liste brute et on la transforme
+  // Si tu as gardé "days" dans d'autres voyages, on gère les deux cas (rétro-compatibilité)
+  let allPhotos = [];
+  
+  if (city.flatPhotos) {
+    // NOUVELLE MÉTHODE : Liste en vrac
+    allPhotos = city.flatPhotos.map(p => ({
+      ...p,
+      dateObj: getDateFromFilename(p.src) // On calcule la date auto depuis le nom de fichier
+    }));
+  } else if (city.days) {
+    // ANCIENNE MÉTHODE (au cas où)
+    allPhotos = city.days.flatMap(d => d.photos.map(p => ({...p, dateObj: new Date(d.date)})));
+  }
+
+  // 2. On trie chronologiquement (du plus vieux au plus récent)
+  allPhotos.sort((a, b) => a.dateObj - b.dateObj);
+
+  // 3. On affiche les markers (Points Rouges)
+  allPhotos.forEach(photo => {
+    if (!photo.coords) return;
+    const marker = L.circleMarker([photo.coords[1], photo.coords[0]], {
+      radius: 7, fillColor: "#ff0000", fillOpacity: 1, color: "#000", weight: 2
     });
+    marker.on("click", () => openPhotoPopup(photo));
+    photoLayer.addLayer(marker);
   });
 
-  // 4. GÉNÉRER LA GALERIE (PAR DATE)
-  const galleryHTML = city.days.map(day => `
+  // 4. On regroupe par JOUR (Grouping)
+  const photosByDay = {};
+  allPhotos.forEach(photo => {
+    // Clé de date lisible : "Lundi 19 mai 2025"
+    if (!photo.dateObj) return; // Sécurité si nom de fichier invalide
+    const dateKey = photo.dateObj.toLocaleDateString("fr-FR", {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    });
+    // On met la 1ere lettre en majuscule
+    const dateKeyCap = dateKey.charAt(0).toUpperCase() + dateKey.slice(1);
+
+    if (!photosByDay[dateKeyCap]) photosByDay[dateKeyCap] = [];
+    photosByDay[dateKeyCap].push(photo);
+  });
+
+  // 5. Génération HTML avec LAZY LOADING
+  // Object.keys ne garantit pas l'ordre, mais comme on a trié allPhotos avant, 
+  // on va itérer sur les groupes dans l'ordre chronologique.
+  
+  // On récupère les clés uniques (les dates) dans l'ordre d'apparition des photos triées
+  const uniqueDates = [...new Set(allPhotos.map(p => {
+     const d = p.dateObj.toLocaleDateString("fr-FR", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+     return d.charAt(0).toUpperCase() + d.slice(1);
+  }))];
+
+  const galleryHTML = uniqueDates.map(dateStr => `
     <div class="day-block">
-      <div class="day-title">${formatDate(day.date)}</div>
-      
+      <div class="day-title">${dateStr}</div>
       <div class="photo-grid-2-cols">
-        ${day.photos.map(photo => `
+        ${photosByDay[dateStr].map(photo => `
           <div class="photo-item">
-            <img src="${photo.src}" onclick='openPhotoPopup(${JSON.stringify(photo)})'>
+            <img 
+              src="${photo.src}" 
+              loading="lazy" 
+              onclick='openPhotoPopup(${JSON.stringify(photo).replace(/'/g, "&#39;")})'
+            >
             ${photo.desc ? `<div class="photo-desc">${photo.desc}</div>` : ''}
           </div>
         `).join('')}
@@ -298,13 +333,29 @@ function toggleCity(city) {
 
   galleryDiv.innerHTML = galleryHTML;
   
-  // Animation et Scroll
   setTimeout(() => {
     galleryDiv.classList.add("active");
     wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 50);
 
   zoomOnCity(city);
+}
+
+// ======================================================
+// UTILITAIRE : Extraction Date depuis Filename
+// ======================================================
+function getDateFromFilename(src) {
+  // Cherche le motif IMG_YYYYMMDD_HHMMSS
+  // Exemple: IMG_20250519_221420.jpg
+  const match = src.match(/IMG_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
+  
+  if (match) {
+    // new Date(Year, MonthIndex (0-11), Day, Hour, Min, Sec)
+    return new Date(match[1], match[2] - 1, match[3], match[4], match[5], match[6]);
+  }
+  
+  // Fallback : Si le nom ne correspond pas, on renvoie une date par défaut (ou null)
+  return new Date(); 
 }
 
 // ======================================================

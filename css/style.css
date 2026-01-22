@@ -206,6 +206,9 @@ body {
   cursor: pointer;
   border: 1px solid #ddd;
   transition: transform 0.2s ease;
+  /* OPTIMISATION PERF */
+  content-visibility: auto; /* Le navigateur ne rend pas l'img si hors écran */
+  contain-intrinsic-size: 110px; /* Taille estimée pour éviter les sauts */
 }
 .photo-item img:hover {
   transform: scale(1.02);
