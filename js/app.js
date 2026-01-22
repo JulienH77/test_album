@@ -182,6 +182,7 @@ travels.forEach(trip => {
 // SELECT TRIP
 // ======================================================
 function selectTrip(trip, li) {
+  closeCities();
   state.selectedTrip = trip;
   state.selectedCity = null;
 
@@ -235,78 +236,101 @@ function renderCities() {
 }
 
 // ======================================================
-// TOGGLE CITY (Avec repli et défilement)
+// TOGGLE CITY (Séparé par date + Grille 2 colonnes)
 // ======================================================
 function toggleCity(city) {
   const galleryDiv = document.getElementById(`gallery-${city.id}`);
-  const isAlreadyOpen = galleryDiv.classList.contains("active");
+  const wrapper = document.getElementById(`wrapper-${city.id}`);
+  
+  // Vérification si on clique sur la même ville
+  const isSameCity = (state.selectedCity && state.selectedCity.id === city.id);
 
-  // On ferme TOUT dans tous les cas avant de décider d'ouvrir
-  closeCities();
+  // 1. RESET COMPLET
+  closeCities(); 
 
-  // Si elle n'était pas ouverte, on l'ouvre
-  if (!isAlreadyOpen) {
-    state.selectedCity = city;
-    
-    // 1. Marqueurs rouges sur la carte
-    photoLayer.clearLayers();
-    city.days.forEach(day => {
-      day.photos.forEach(photo => {
-        if (!photo.coords) return;
-        const marker = L.circleMarker([photo.coords[1], photo.coords[0]], {
-          radius: 7,
-          fillColor: "#ff0000",
-          fillOpacity: 1,
-          color: "#000",
-          weight: 2
-        }).addTo(photoLayer);
-        marker.on("click", () => openPhotoPopup(photo));
-      });
-    });
-
-    // 2. Remplissage Galerie
-    galleryDiv.innerHTML = city.days.map(day => `
-      <div class="day-block">
-        <div class="day-title">${formatDate(day.date)}</div>
-        <div class="photo-grid">
-          ${day.photos.map(p => `
-            <div class="photo-item">
-              <img src="${p.src}" onclick='openPhotoPopup(${JSON.stringify(p)})'>
-              <p class="photo-desc">${p.desc || ""}</p>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `).join('');
-
-    galleryDiv.classList.add("active");
-    
-    // 3. Scroll
-    setTimeout(() => {
-      document.getElementById(`wrapper-${city.id}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
-
-    zoomOnCity(city);
+  // Si c'était la même ville, on a tout fermé, on s'arrête.
+  if (isSameCity) {
+    return;
   }
+
+  // 2. NOUVELLE SÉLECTION
+  state.selectedCity = city;
+
+  // Masquer les points blancs des villes
+  if (map.hasLayer(cityLayer)) {
+    map.removeLayer(cityLayer);
+  }
+  map.closePopup();
+
+  // 3. AFFICHER LES PHOTOS SUR LA CARTE (POINTS ROUGES)
+  city.days.forEach(day => {
+    day.photos.forEach(photo => {
+      if (!photo.coords) return;
+      
+      const marker = L.circleMarker([photo.coords[1], photo.coords[0]], {
+        radius: 7,
+        fillColor: "#ff0000", // Rouge
+        fillOpacity: 1,
+        color: "#000",
+        weight: 2
+      });
+      
+      marker.on("click", () => openPhotoPopup(photo));
+      photoLayer.addLayer(marker);
+    });
+  });
+
+  // 4. GÉNÉRER LA GALERIE (PAR DATE)
+  const galleryHTML = city.days.map(day => `
+    <div class="day-block">
+      <div class="day-title">${formatDate(day.date)}</div>
+      
+      <div class="photo-grid-2-cols">
+        ${day.photos.map(photo => `
+          <div class="photo-item">
+            <img src="${photo.src}" onclick='openPhotoPopup(${JSON.stringify(photo)})'>
+            ${photo.desc ? `<div class="photo-desc">${photo.desc}</div>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  galleryDiv.innerHTML = galleryHTML;
+  
+  // Animation et Scroll
+  setTimeout(() => {
+    galleryDiv.classList.add("active");
+    wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
+
+  zoomOnCity(city);
 }
 
+// ======================================================
+// CLOSE CITIES (Réinitialisation)
+// ======================================================
 function closeCities() {
-  state.selectedCity = null;
+  // 1. Fermer les galeries sidebar
   document.querySelectorAll(".city-gallery-container").forEach(el => {
     el.classList.remove("active");
-    el.innerHTML = ""; // On vide pour être sûr
+    el.innerHTML = "";
   });
-  photoLayer.clearLayers();
+
+  // 2. Nettoyer la carte
+  photoLayer.clearLayers(); // Enlève les points rouges
+  map.closePopup();         // Ferme les popups photos
+
+  // 3. Ré-afficher les points blancs des villes (si un voyage est sélectionné)
+  if (state.selectedTrip) {
+    if (!map.hasLayer(cityLayer)) {
+      map.addLayer(cityLayer);
+    }
+  }
+
+  state.selectedCity = null;
 }
 
-// ======================================================
-// CLOSE ALL CITIES
-// ======================================================
-function closeCities() {
-  document.querySelectorAll(".city-gallery").forEach(el => el.remove());
-  state.selectedCity = null;
-  photoLayer.clearLayers();
-}
 
 // ======================================================
 // MAP HELPERS
@@ -326,7 +350,7 @@ function openPhotoPopup(photo) {
   const d = extractDateFromFilename(photo.src);
   const dateStr = d ? d.toLocaleString("fr-FR") : "";
 
-  const html = `
+const html = `
     <div class="leaflet-photo-popup">
       <div class="popup-desc">${photo.desc || ""}</div>
       <div class="popup-img-wrapper">
@@ -338,11 +362,11 @@ function openPhotoPopup(photo) {
     </div>
   `;
 
-	 L.popup({ 
-	  maxWidth: 700, // Augmenté pour voir les photos en grand
-	  minWidth: 400, 
-	  className: 'custom-photo-popup' 
-	})
+  L.popup({ 
+    maxWidth: 550,
+    minWidth: 300,
+    className: 'custom-popup'
+  })
     .setLatLng([photo.coords[1], photo.coords[0]])
     .setContent(html)
     .openOn(map);
