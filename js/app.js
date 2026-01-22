@@ -238,71 +238,64 @@ function renderCities() {
 // TOGGLE CITY (Avec repli et défilement)
 // ======================================================
 function toggleCity(city) {
-  const wrapper = document.getElementById(`wrapper-${city.id}`);
   const galleryDiv = document.getElementById(`gallery-${city.id}`);
-  
-  // Si on clique sur la ville déjà ouverte : on replie tout et on arrête
-  if (state.selectedCity?.id === city.id) {
-    closeCities();
-    showCities(state.selectedTrip);
-    return;
-  }
+  const isAlreadyOpen = galleryDiv.classList.contains("active");
 
-  // 1. Fermer les autres galeries
+  // On ferme TOUT dans tous les cas avant de décider d'ouvrir
   closeCities();
-  state.selectedCity = city;
 
-  // 2. Mise à jour visuelle de la carte (Marqueurs rouges)
-  cityLayer.clearLayers();
-  photoLayer.clearLayers();
-
-  city.days.forEach(day => {
-    day.photos.forEach(photo => {
-      if (!photo.coords) return;
-      const marker = L.circleMarker([photo.coords[1], photo.coords[0]], {
-        radius: 6,
-        fillColor: "#ff0000", // Rouge
-        fillOpacity: 1,
-        color: "#000000",      // Contour noir
-        weight: 2
+  // Si elle n'était pas ouverte, on l'ouvre
+  if (!isAlreadyOpen) {
+    state.selectedCity = city;
+    
+    // 1. Marqueurs rouges sur la carte
+    photoLayer.clearLayers();
+    city.days.forEach(day => {
+      day.photos.forEach(photo => {
+        if (!photo.coords) return;
+        const marker = L.circleMarker([photo.coords[1], photo.coords[0]], {
+          radius: 7,
+          fillColor: "#ff0000",
+          fillOpacity: 1,
+          color: "#000",
+          weight: 2
+        }).addTo(photoLayer);
+        marker.on("click", () => openPhotoPopup(photo));
       });
-      marker.on("click", () => openPhotoPopup(photo));
-      photoLayer.addLayer(marker);
     });
-  });
 
-  // 3. Remplissage et ouverture de la galerie
-  const galleryHTML = city.days.map(day => `
-    <div class="day-block">
-      <div class="day-title">${formatDate(day.date)}</div>
-      <div class="photo-grid">
-        ${day.photos.map(photo => `
-          <div class="photo-item">
-            <img src="${photo.src}" onclick='openPhotoPopup(${JSON.stringify(photo)})'>
-            <div class="photo-desc">${photo.desc || ""}</div>
-          </div>
-        `).join('')}
+    // 2. Remplissage Galerie
+    galleryDiv.innerHTML = city.days.map(day => `
+      <div class="day-block">
+        <div class="day-title">${formatDate(day.date)}</div>
+        <div class="photo-grid">
+          ${day.photos.map(p => `
+            <div class="photo-item">
+              <img src="${p.src}" onclick='openPhotoPopup(${JSON.stringify(p)})'>
+              <p class="photo-desc">${p.desc || ""}</p>
+            </div>
+          `).join('')}
+        </div>
       </div>
-    </div>
-  `).join('');
+    `).join('');
 
-  galleryDiv.innerHTML = galleryHTML;
-  galleryDiv.classList.add("active");
+    galleryDiv.classList.add("active");
+    
+    // 3. Scroll
+    setTimeout(() => {
+      document.getElementById(`wrapper-${city.id}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
 
-  // 4. Remonter la ville en haut de la sidebar
-  setTimeout(() => {
-    wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 300); // Petit délai pour laisser l'animation de dépliage commencer
-
-  zoomOnCity(city);
+    zoomOnCity(city);
+  }
 }
 
 function closeCities() {
+  state.selectedCity = null;
   document.querySelectorAll(".city-gallery-container").forEach(el => {
     el.classList.remove("active");
-    el.innerHTML = "";
+    el.innerHTML = ""; // On vide pour être sûr
   });
-  state.selectedCity = null;
   photoLayer.clearLayers();
 }
 
@@ -345,7 +338,11 @@ function openPhotoPopup(photo) {
     </div>
   `;
 
-  L.popup({ maxWidth: 420 })
+	 L.popup({ 
+	  maxWidth: 700, // Augmenté pour voir les photos en grand
+	  minWidth: 400, 
+	  className: 'custom-photo-popup' 
+	})
     .setLatLng([photo.coords[1], photo.coords[0]])
     .setContent(html)
     .openOn(map);

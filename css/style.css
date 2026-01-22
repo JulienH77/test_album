@@ -139,10 +139,12 @@ body {
   border-radius: 0 0 12px 12px;
 }
 .city-gallery-container.active {
-  max-height: 2500px; /* Large limite pour le contenu */
-  border: 1px solid #eee;
-  border-top: none;
-  margin-bottom: 20px;
+  max-height: none;
+  background: #f0f2f5; /* Fond gris bleu très léger */
+  border-left: 4px solid #ff0000; /* Rappel de la couleur des points */
+  margin: 10px 0 20px 0;
+  padding: 15px;
+  border-radius: 0 0 10px 10px;
 }
 .city-gallery {
   margin-top: 8px;
@@ -159,17 +161,31 @@ body {
   cursor: pointer;
   transition: transform 0.15s;
 }
+/* Centrage du texte au-dessus du point */
+.city-label {
+  background: transparent !important;
+  border: none !important;
+}
 .city-label span {
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.7);
   color: white;
-  padding: 2px 5px;
+  padding: 3px 8px;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 13px;
   white-space: nowrap;
+  
+  /* Le secret du centrage : */
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -140%); /* Décale de 50% vers la gauche et remonte */
 }
 
 .day-block {
-  margin-bottom: 16px;
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 .day-title {
   font-weight: bold;
@@ -223,7 +239,14 @@ body {
 #map {
   flex: 1;
 }
-
+.custom-photo-popup .leaflet-popup-content {
+  width: 600px !important; /* Force la largeur */
+}
+.custom-photo-popup img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
 .leaflet-photo-popup {
   font-family: sans-serif;
 }
