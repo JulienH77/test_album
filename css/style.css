@@ -13,7 +13,6 @@ body {
   height: 100vh;
 }
 
-/* SIDEBAR */
 #sidebar {
   width: 360px;
   background: #f7f7f7;
@@ -53,7 +52,6 @@ body {
   font-weight: bold;
 }
 
-/* CONTENT */
 #content-section {
   flex: 1;
   overflow-y: auto;
@@ -64,13 +62,11 @@ body {
   font-style: italic;
 }
 
-/* CITY LIST */
 .city {
   margin-bottom: 10px;
 }
-/* --- Accordéon et Sidebar --- */
 #content-section {
-  scroll-behavior: smooth; /* Défilement fluide pour toute la section */
+  scroll-behavior: smooth;
 }
 
 .city-wrapper {
@@ -98,39 +94,35 @@ body {
   cursor: pointer;
   font-weight: 600;
 }
-/* L'overlay noir semi-transparent */
 .city-overlay {
   position: absolute;
   top: 0; left: 0; 
   width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0); /* Transparent par défaut */
+  background: rgba(0, 0, 0, 0);
   transition: background 0.3s ease;
-  z-index: 1; /* Couche basse */
+  z-index: 1;
 }
 .city-header:hover {
   background: #eee;
 }
-/* Effets au Survol */
 .city-card:hover .city-overlay {
-  background: rgba(0, 0, 0, 0.5); /* Le fond s'assombrit */
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .city-card:hover .city-name {
   color: #ffffff;
   text-shadow: none;
 }
-/* Le texte du nom de la ville */
 .city-name {
   position: relative;
   z-index: 2;
   color: #000;
   font-weight: 700;
-  font-size: 1.2rem; /* Taille réduite */
-  text-transform: none; /* Plus de majuscules forcées */
+  font-size: 1.2rem; 
+  text-transform: none;
   text-shadow: 0 0 8px rgba(255,255,255,0.8);
   transition: color 0.3s ease;
 }	
-/* Conteneur de la galerie (Accordéon) */
 .city-gallery-container {
   max-height: 0;
   overflow: hidden;
@@ -140,8 +132,8 @@ body {
 }
 .city-gallery-container.active {
   max-height: none;
-  background: #f0f2f5; /* Fond gris bleu très léger */
-  border-left: 4px solid #ff0000; /* Rappel de la couleur des points */
+  background: #f0f2f5;
+  border-left: 4px solid #ff0000;
   margin: 10px 0 20px 0;
   padding: 15px;
   border-radius: 0 0 10px 10px;
@@ -161,24 +153,25 @@ body {
   cursor: pointer;
   transition: transform 0.15s;
 }
-/* Centrage du texte au-dessus du point */
 .city-label {
   background: transparent !important;
   border: none !important;
 }
-/* --- 4. Ajustement Label Ville (Plus bas) --- */
 .city-label span {
-  /* ... vos styles existants ... */
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  white-space: nowrap;
   position: absolute;
   left: 50%;
-  /* On passe de -140% à -110% pour le descendre un peu */
   transform: translate(-50%, -110%); 
-  margin-bottom: 5px; /* Petit espace avec le point */
+  bottom: -120%;
 }
 
-/* --- Bloc par Jour --- */
 .day-block {
-  margin-bottom: 25px; /* Espace entre les dates */
+  margin-bottom: 25px;
   background: white;
   padding: 10px;
   border-radius: 8px;
@@ -189,49 +182,45 @@ body {
   font-size: 0.95rem;
   color: #333;
   margin-bottom: 10px;
-  border-bottom: 2px solid #ff0000; /* Souligné rouge rappelant les points */
+  border-bottom: 2px solid #ff0000;
   display: inline-block;
   padding-bottom: 3px;
 }
-/* --- Style de l'item photo --- */
 .photo-item {
   display: flex;
   flex-direction: column;
 }
 .photo-item img {
   width: 100%;
-  height: 110px; /* Hauteur fixe pour alignement parfait */
-  object-fit: cover; /* Recadre l'image pour remplir le carré sans déformer */
+  height: 110px;
+  object-fit: cover;
   border-radius: 6px;
   cursor: pointer;
   border: 1px solid #ddd;
   transition: transform 0.2s ease;
   /* OPTIMISATION PERF */
-  content-visibility: auto; /* Le navigateur ne rend pas l'img si hors écran */
-  contain-intrinsic-size: 110px; /* Taille estimée pour éviter les sauts */
+  content-visibility: auto;
+  contain-intrinsic-size: 110px;
 }
 .photo-item img:hover {
   transform: scale(1.02);
   border-color: #ff0000;
 }
-/* --- Grille 2 Colonnes strictes --- */
 .photo-grid-2-cols {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Exactement 2 colonnes de taille égale */
-  gap: 10px; /* Espace entre les photos */
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
-/* Grille de photos plus propre */
 .photo-grid {
   display: flex;
   flex-direction: column;
   gap: 15px;
   padding: 10px;
 }
-/* --- 1. Grille Unifiée (Sans jours) --- */
 .photo-grid-unified {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* Tuiles auto */
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 10px;
   padding: 10px;
 }
@@ -239,7 +228,6 @@ body {
   border-bottom: 1px solid #f0f0f0;
   padding-bottom: 10px;
 }
-/* --- Marqueurs Photos sur la carte --- */
 .photo-dot {
   width: 10px;
   height: 10px;
@@ -259,12 +247,11 @@ body {
   transform: scale(1.05);
 }
 
-/* MAP */
 #map {
   flex: 1;
 }
 .custom-photo-popup .leaflet-popup-content {
-  width: 600px !important; /* Force la largeur */
+  width: 600px !important;
 }
 .custom-photo-popup img {
   width: 100%;
@@ -274,20 +261,17 @@ body {
 .leaflet-photo-popup {
   font-family: sans-serif;
 }
-/* --- Popups Leaflet --- */
 .leaflet-photo-popup img {
   width: 100%;
   height: auto;
-  max-height: 400px; /* Plus grand pour le visuel */
+  max-height: 400px;
   display: block;
   border-radius: 4px;
 }
-/* --- 5. Popups Leaflet (Taille moyenne & Ratio respecté) --- */
-/* On cible l'image dans la popup */
 .leaflet-popup-img {
-  max-width: 500px !important;  /* Largeur max raisonnable */
-  max-height: 400px !important; /* Hauteur max pour ne pas sortir de l'écran */
-  width: auto !important;       /* Laisse le ratio se faire */
+  max-width: 500px !important;
+  max-height: 400px !important;
+  width: auto !important;
   height: auto !important;
   display: block;
   margin: 0 auto;
