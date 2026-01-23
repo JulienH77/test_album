@@ -38,7 +38,8 @@ const baseMaps = {
 };
 
 L.control.layers(baseMaps).addTo(map);
-L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
+// Affiche KM et Miles (imperial: true)
+L.control.scale({ imperial: true, metric: true, position: 'bottomright' }).addTo(map);
 
 // ======================================================
 // LEAFLET LAYERS (ordre important)
@@ -59,7 +60,10 @@ fetch("data/GEOJSON/TRAJETS_ALL_vacances_wgs.geojson")
   })
   .then(data => {
     trajetsGeoJSON = data;
+	// --- AJOUTER CETTE LIGNE ICI ---
+    legend.addTo(map); // La légende apparaît dès que les trajets sont chargés
   })
+  
   .catch(err => console.error("Erreur chargement trajets :", err));
 
 // ======================================================
@@ -80,6 +84,40 @@ function trajetStyle(feature) {
     opacity: 1
   };
 }
+
+// ======================================================
+// LEGENDE TRAJETS
+// ======================================================
+const legend = L.control({ position: 'bottomleft' });
+
+legend.onAdd = function (map) {
+  const div = L.DomUtil.create('div', 'info legend');
+  const grades = ["avion", "train", "bus", "voiture", "bateau"];
+  const colors = {
+    avion: "#00dbc5",
+    train: "#db0016",
+    bus: "#dbc500",
+    voiture: "#0016db",
+    bateau: "#0084db"
+  };
+  const labels = [];
+
+  div.innerHTML += '<strong>Transports</strong><br>';
+
+  grades.forEach(mode => {
+    div.innerHTML +=
+      '<i style="background:' + colors[mode] + '"></i> ' +
+      mode.charAt(0).toUpperCase() + mode.slice(1) + '<br>';
+  });
+
+  return div;
+};
+
+/*legend.addTo(map);*/
+
+
+
+
 
 // ======================================================
 // SHOW TRAJETS FOR ONE TRIP
@@ -236,14 +274,12 @@ function renderCities() {
 }
 
 // ======================================================
-// TOGGLE CITY (AUTO-SORT & LAZY LOAD)
+// TOGGLE CITY (AUTO-SORT & LAZY LOAD & HOTELS)
 // ======================================================
 function toggleCity(city) {
   const galleryDiv = document.getElementById(`gallery-${city.id}`);
   const wrapper = document.getElementById(`wrapper-${city.id}`);
   
-  // Si c'est déjà la ville active, on ne fait rien (car closeCities a déjà tout fermé juste avant si besoin)
-  // Note : j'ai simplifié la logique d'ouverture/fermeture pour être plus robuste
   const isSameCity = (state.selectedCity && state.selectedCity.id === city.id);
 
   closeCities(); 
@@ -252,66 +288,80 @@ function toggleCity(city) {
 
   state.selectedCity = city;
 
-  // Masquer les points blancs
+  // Masquer les points blancs des villes
   if (map.hasLayer(cityLayer)) map.removeLayer(cityLayer);
   map.closePopup();
 
-  // ------------------------------------------------------
-  // LE COEUR DU SYSTÈME : TRAITEMENT AUTOMATIQUE
-  // ------------------------------------------------------
-  
-  // 1. On récupère la liste brute et on la transforme
-  // Si tu as gardé "days" dans d'autres voyages, on gère les deux cas (rétro-compatibilité)
-  let allPhotos = [];
-  
+  // 1. Préparation des données
+  let allItems = [];
   if (city.flatPhotos) {
-    // NOUVELLE MÉTHODE : Liste en vrac
-    allPhotos = city.flatPhotos.map(p => ({
+    allItems = city.flatPhotos.map(p => ({
       ...p,
-      dateObj: getDateFromFilename(p.src) // On calcule la date auto depuis le nom de fichier
+      dateObj: p.src ? getDateFromFilename(p.src) : null // Les hotels n'ont pas forcément de src
     }));
   } else if (city.days) {
-    // ANCIENNE MÉTHODE (au cas où)
-    allPhotos = city.days.flatMap(d => d.photos.map(p => ({...p, dateObj: new Date(d.date)})));
+    allItems = city.days.flatMap(d => d.photos.map(p => ({...p, dateObj: new Date(d.date)})));
   }
 
-  // 2. On trie chronologiquement (du plus vieux au plus récent)
-  allPhotos.sort((a, b) => a.dateObj - b.dateObj);
+  // 2. Séparer les Hôtels des Photos
+  const hotels = allItems.filter(item => item.type === 'hotel');
+  const photos = allItems.filter(item => item.type !== 'hotel');
 
-  // 3. On affiche les markers (Points Rouges)
-  allPhotos.forEach(photo => {
-    if (!photo.coords) return;
-    const marker = L.circleMarker([photo.coords[1], photo.coords[0]], {
-      radius: 7, fillColor: "#ff0000", fillOpacity: 1, color: "#000", weight: 2
+// 3. Afficher les HOTELS (Point 2 : On les ajoute APRÈS ou avec un Z-index élevé)
+hotels.forEach(h => {
+    if(!h.coords) return;
+    const hotelIcon = L.divIcon({
+        className: 'custom-hotel-icon',
+        html: '🏢',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
     });
-    marker.on("click", () => openPhotoPopup(photo));
-    photoLayer.addLayer(marker);
+    
+    L.marker([h.coords[1], h.coords[0]], {
+	   icon: hotelIcon,
+       zIndexOffset: 1000 // Force l'affichage par-dessus les photos
+	})
+      .bindPopup(`<b>Hôtel</b><br>Du: ${h.datedeb || '?'}<br>Au: ${h.datefin || '?'}`)
+      .addTo(photoLayer);
+
   });
 
-  // 4. On regroupe par JOUR (Grouping)
+  // 4. Afficher les PHOTOS (Version "Jolie" avec CSS)
+  // On trie les photos chronologiquement
+  photos.forEach(photo => {
+      if (!photo.coords) return;
+      const photoIcon = L.divIcon({
+          className: 'photo-marker-icon', // On va changer le style dans le CSS
+          iconSize: [12, 12], 
+          iconAnchor: [5, 5]
+      });
+	  
+  const marker = L.marker([photo.coords[1], photo.coords[0]], { 
+          icon: photoIcon,
+          zIndexOffset: 500 // En dessous des hôtels
+      });
+      
+      marker.on("click", () => openPhotoPopup(photo));
+      photoLayer.addLayer(marker);
+  });
+
+  // 5. Génération HTML (Galerie) - On n'affiche que les photos, pas les hotels
   const photosByDay = {};
-  allPhotos.forEach(photo => {
-    // Clé de date lisible : "Lundi 19 mai 2025"
-    if (!photo.dateObj) return; // Sécurité si nom de fichier invalide
+  photos.forEach(photo => {
+    if (!photo.dateObj) return; 
     const dateKey = photo.dateObj.toLocaleDateString("fr-FR", {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
     });
-    // On met la 1ere lettre en majuscule
     const dateKeyCap = dateKey.charAt(0).toUpperCase() + dateKey.slice(1);
-
     if (!photosByDay[dateKeyCap]) photosByDay[dateKeyCap] = [];
     photosByDay[dateKeyCap].push(photo);
   });
 
-  // 5. Génération HTML avec LAZY LOADING
-  // Object.keys ne garantit pas l'ordre, mais comme on a trié allPhotos avant, 
-  // on va itérer sur les groupes dans l'ordre chronologique.
-  
-  // On récupère les clés uniques (les dates) dans l'ordre d'apparition des photos triées
-  const uniqueDates = [...new Set(allPhotos.map(p => {
+  const uniqueDates = [...new Set(photos.map(p => {
+     if(!p.dateObj) return null;
      const d = p.dateObj.toLocaleDateString("fr-FR", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
      return d.charAt(0).toUpperCase() + d.slice(1);
-  }))];
+  }))].filter(d => d !== null);
 
   const galleryHTML = uniqueDates.map(dateStr => `
     <div class="day-block">
@@ -338,6 +388,7 @@ function toggleCity(city) {
     wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 50);
 
+  // Utiliser le zoom spécifique ou defaut (Point 2)
   zoomOnCity(city);
 }
 
@@ -378,7 +429,7 @@ function closeCities() {
       map.addLayer(cityLayer);
     }
   }
-
+  photoLayer.clearLayers();
   state.selectedCity = null;
 }
 
@@ -391,7 +442,9 @@ function zoomToTrip(trip) {
 }
 
 function zoomOnCity(city) {
-  map.setView([city.lat, city.lng], 12);
+  // Utilise city.zoom s'il existe, sinon 12 par défaut
+  const zoomLevel = city.zoom || 12;
+  map.setView([city.lat, city.lng], zoomLevel);
 }
 
 // ======================================================
@@ -449,4 +502,25 @@ function extractDateFromFilename(src) {
   const m = src.match(/IMG_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
   if (!m) return null;
   return new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}`);
+}
+
+
+// ======================================================
+// GESTION ZOOM LABELS
+// ======================================================
+map.on('zoomend', function() {
+  const currentZoom = map.getZoom();
+  const mapDiv = document.getElementById('map');
+  
+  // Si le zoom est inférieur à 5 (trop haut), on cache les labels
+  if (currentZoom < 5) {
+    mapDiv.classList.add('map-zoomed-out');
+  } else {
+    mapDiv.classList.remove('map-zoomed-out');
+  }
+});
+
+// Appel initial
+if(map.getZoom() < 5) {
+    document.getElementById('map').classList.add('map-zoomed-out');
 }
