@@ -75,7 +75,7 @@ body {
 }
 .city-card {
   position: relative;
-  height: 120px;
+  height: 212.6px; /*120px*/
   background-size: cover;
   background-position: center;
   border-radius: 12px;
