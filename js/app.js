@@ -10,34 +10,114 @@ const state = {
 // INIT MAP & LAYERS
 // ======================================================
 const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "© OpenStreetMap"
+  attribution: 'Julien Houziaux | OSM'
 });
 
 const googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-  maxZoom: 20,
-  subdomains:['mt0','mt1','mt2','mt3'],
-  attribution: "© Google Maps"
-});
+    maxZoom: 20,
+    subdomains:['mt0','mt1','mt2','mt3'],
+	attribution: 'Julien Houziaux | Google Satellite'
+  }
+);
 
 const googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-  maxZoom: 20,
-  subdomains:['mt0','mt1','mt2','mt3'],
-  attribution: "© Google Maps"
-});
+    maxZoom: 20,
+    subdomains:['mt0','mt1','mt2','mt3'],
+	attribution: 'Julien Houziaux | Google Maps'
+  }
+);
 
 const map = L.map("map", {
   center: [20, 0],
   zoom: 2,
-  layers: [osm] // Fond par défaut
+  layers: [osm]
 });
+
+const hillshade = L.tileLayer(
+  'https://services.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}',
+  {
+    maxZoom: 13,
+    attribution: 'Esri',
+    opacity: 0.4
+  }
+);
 
 const baseMaps = {
   "OpenStreetMap": osm,
   "Google Satellite": googleSat,
-  "Google Street": googleStreets
+  "Google Street": googleStreets,
 };
 
-L.control.layers(baseMaps).addTo(map);
+const osmb = new OSMBuildings(map)
+  .load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
+
+const osmbLayer = L.layerGroup();
+
+const hillshadeLabel = `
+  <span>Relief</span>
+  <div style="margin-left:22px; margin-top:4px;">
+    <input
+      type="range"
+      min="0"
+      max="1"
+      step="0.05"
+      value="0.4"
+      id="hillshadeOpacity"
+    >
+  </div>
+`;
+
+const groupedOverlays = {
+  "hillshade": {
+    [hillshadeLabel]: hillshade
+  },
+  "3D building": {
+    "Bâtiments 3D": osmbLayer
+  }};
+
+L.control.groupedLayers(
+  baseMaps,
+  groupedOverlays,
+  { collapsed: true }
+).addTo(map);
+
+map.on('layeradd', function () {
+  const slider = document.getElementById('hillshadeOpacity');
+  if (slider) {
+    slider.addEventListener('input', function (e) {
+      hillshade.setOpacity(e.target.value);
+    });
+  }
+});
+map.on('overlayadd', function (e) {
+  if (e.layer === osmbLayer) {
+    osmb.addTo(map);
+  }
+});
+
+map.on('overlayremove', function (e) {
+  if (e.layer === osmbLayer) {
+    osmb.remove();
+  }
+});
+
+
+map.whenReady(() => {
+  setTimeout(() => {
+    const slider = document.getElementById('hillshadeOpacity');
+    if (!slider) return;
+
+    // Empêche Leaflet de capter les events
+    L.DomEvent.disableClickPropagation(slider);
+    L.DomEvent.disableScrollPropagation(slider);
+
+    slider.addEventListener('input', e => {
+      hillshade.setOpacity(e.target.value);
+    });
+  }, 300);
+});
+
+
 // Affiche KM et Miles (imperial: true)
 L.control.scale({ imperial: true, metric: true, position: 'bottomright' }).addTo(map);
 
