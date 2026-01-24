@@ -380,3 +380,7 @@ body {
 .photo-marker-icon:hover {
     filter: brightness(1.2);
 }
+
+.leaflet-control-layers input[type="range"] {
+  width: 90%;
+}
