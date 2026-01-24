@@ -5,13 +5,15 @@
   <title>Mes voyages</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Leaflet -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
-
+ <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <!-- Grouped Layer Control CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-groupedlayercontrol/dist/leaflet.groupedlayercontrol.min.css">
+  <!--OSMBuilding 3D-->
+  <script src="https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings-Leaflet.js"></script>
+  
   <link rel="stylesheet" href="css/style.css" />
+ 
 </head>
 <body>
 
@@ -40,8 +42,15 @@
 
 </div>
 
-<!-- Leaflet -->
+
+<!-- Leaflet JS (TOUJOURS EN PREMIER) -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Grouped Layer Control (APRÈS Leaflet) -->
+<script src="https://unpkg.com/leaflet-groupedlayercontrol/dist/leaflet.groupedlayercontrol.min.js"></script>
+
+<!-- OSMBuildings (APRÈS Leaflet) -->
+<script src="https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings-Leaflet.js"></script>
 
 <!-- DATA -->
 <script src="data/travels.js"></script>
