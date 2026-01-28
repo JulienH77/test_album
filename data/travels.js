@@ -11,10 +11,8 @@ const travels = [
         lng: 116.32324,
 		zoom: 9,
         flatPhotos: [
-		/*
 		{ type: 'hotel', datedeb:'11/05/2025', datefin:'15/05/2025', coords:[116.4106, 39.90006] },
         { type: 'hotel', datedeb:'28/05/2025', datefin:'30/05/2025', coords:[116.38023, 39.86887] },
-		*/
         /*The great wall*/
         { desc:'Entering the Great Wall', coords:[116.5379, 40.41597], src:'data/IMG/2025/China/Beijing/IMG_20250512_130110.jpg', rotation: 25 },
         { desc:'Arriving in cabble car', coords:[116.55903, 40.43878], src:'data/IMG/2025/China/Beijing/IMG_20250512_140556.jpg', rotation: 90 },
@@ -99,9 +97,7 @@ const travels = [
         lng: 108.93905,
 		zoom: 11,
         flatPhotos: [
-		/*
 		{ type: 'hotel', datedeb:'15/05/2025', datefin:'19/05/2025', coords:[108.927897, 34.247519] },
-		*/
         { desc:'Arriving in Xi\'an', coords:[108.93470, 34.24256], src:'data/IMG/2025/China/Xian/IMG_20250515_145610.jpg', rotation: 348 },
         { desc:'View from my room', coords:[108.92789, 34.24751], src:'data/IMG/2025/China/Xian/IMG_20250515_201715.jpg', rotation: 91 },
         { desc:'The old rampart', coords:[108.92839, 34.25314], src:'data/IMG/2025/China/Xian/IMG_20250515_215025.jpg', rotation: 340 },
@@ -151,9 +147,7 @@ const travels = [
         lng: 121.46278,
 		zoom: 13,
         flatPhotos: [
-		/*
 		{ type: 'hotel', datedeb:'19/05/2025', datefin:'24/05/2025', coords:[121.44882, 31.24892] },
-		*/
         /*First visit of the bund*/
         { desc:'The Bund', coords:[121.486234, 31.240105], src:'data/IMG/2025/China/Shanghai/IMG_20250519_221420.jpg', rotation: 97 },
         { desc:'The Bund', coords:[121.48624, 31.240071], src:'data/IMG/2025/China/Shanghai/IMG_20250519_221554.jpg', rotation: 97 },
@@ -232,10 +226,8 @@ const travels = [
         lng: 110.29449,
 		zoom: 10,
         flatPhotos: [
-		/*
 		{ type: 'hotel', datedeb:'24/05/2025', datefin:'25/05/2025', coords:[110.29357, 25.27618] },
         { type: 'hotel', datedeb:'27/05/2025', datefin:'28/05/2025', coords:[110.28903, 25.28033] },
-		*/
         /*The pagodas*/
         { desc:'The pagodas of moon and sun', coords:[110.29236, 25.27466], src:'data/IMG/2025/China/Guilin/IMG_20250524_203940.jpg', rotation: 259 },
         { desc:'The pagodas of moon and sun', coords:[110.29228, 25.27462], src:'data/IMG/2025/China/Guilin/IMG_20250524_203944.jpg', rotation: 259 },
@@ -274,9 +266,7 @@ const travels = [
         lng: 110.48126,
 		zoom: 13,
         flatPhotos: [
-		/*
 		{ type: 'hotel', datedeb:'25/05/2025', datefin:'27/05/2025', coords:[110.49081, 24.77598] },
-		*/
         /*Visiting the city*/
         { desc:'Arriving by boat at Yangshuo', coords:[110.49659, 24.78710], src:'data/IMG/2025/China/Yangshuo/IMG_20250525_145400.jpg', rotation: 17 },
         { desc:'The view outside of my hotel', coords:[110.48936, 24.77612], src:'data/IMG/2025/China/Yangshuo/IMG_20250525_175531.jpg', rotation: 319 },
@@ -373,9 +363,7 @@ const travels = [
 	  lng: 11.57375,
 	  zoom: 13,
 	  flatPhotos: [
-		/*
 		{ type: 'hotel', datedeb:'11/07/2025', datefin:'13/07/2025', coords:[11.622536, 48.136962] },
-		*/
          { desc:'Marienplatz', coords:[11.57566, 48.13707], src:'data/IMG/2025/Central Europe/Munich/IMG_20250712_145518.jpg', rotation: 349 },
          { desc:'Cathedral', coords:[11.57251, 48.13863], src:'data/IMG/2025/Central Europe/Munich/IMG_20250712_173138.jpg', rotation: 100 },
          { desc:'Beer at the englischergarten', coords:[11.59248, 48.15229], src:'data/IMG/2025/Central Europe/Munich/IMG_20250712_193124.jpg', rotation: 70 },
@@ -406,9 +394,7 @@ const travels = [
 	  lng: 13.04145,
 	  zoom: 14,
 	  flatPhotos: [
-		/*
 		{ type: 'hotel', datedeb:'13/07/2025', datefin:'15/07/2025', coords:[13.037606, 47.810420] },
-		*/
         { desc:'Beautiful view of the old town', coords:[13.04112, 47.802834], src:'data/IMG/2025/Central Europe/Salzburg/IMG_20250713_183644.jpg', rotation: 151 },
         { desc:'Mozart Diner Concert', coords:[13.0441398, 47.7970268], src:'data/IMG/2025/Central Europe/Salzburg/IMG_20250713_185800.jpg', rotation: 120 },
         { desc:'Us after the Mozart Diner Concert on not very legal stands', coords:[13.04546, 47.797928], src:'data/IMG/2025/Central Europe/Salzburg/IMG_20250713_220915.jpg', rotation: 315 },
@@ -426,9 +412,7 @@ const travels = [
 	  lng: 19.06059,
 	  zoom: 13,
 	  flatPhotos: [
-		/*
 		{ type: 'hotel', datedeb:'18/07/2025', datefin:'21/07/2025', coords:[19.0628424, 47.4977553] },
-		*/
         { desc:'Piece of Berlin wall', coords:[19.06529, 47.50668], src:'data/IMG/2025/Central Europe/Budapest/IMG_20250718_185336.jpg', rotation: 35 },
         { desc:'Iron curtain', coords:[19.06544, 47.50679], src:'data/IMG/2025/Central Europe/Budapest/IMG_20250718_185723.jpg', rotation: 210 },
         { desc:'Heroes square', coords:[19.077351, 47.514584], src:'data/IMG/2025/Central Europe/Budapest/IMG_20250718_191011.jpg', rotation: 41 },
@@ -460,9 +444,7 @@ const travels = [
 	  lng: 14.41981,
 	  zoom:14,
 	  flatPhotos: [
-		/*
 		{ type: 'hotel', datedeb:'21/07/2025', datefin:'24/07/2025', coords:[14.454204, 50.094476] },
-		*/
         { desc:'Distorting mirror', coords:[14.42559, 50.08526], src:'data/IMG/2025/Central Europe/Prague/IMG_20250722_135000.jpg', rotation: 40 },
         { desc:'Powder tower', coords:[14.42802, 50.08691], src:'data/IMG/2025/Central Europe/Prague/IMG_20250722_140357.jpg', rotation: 335 },
         { desc:'Astronomical clock', coords:[14.42091, 50.08690], src:'data/IMG/2025/Central Europe/Prague/IMG_20250722_144513.jpg', rotation: 328 },
@@ -495,9 +477,7 @@ const travels = [
 	  lng: 12.09817,
 	  zoom: 14,
 	  flatPhotos: [
-	  	/*
 		{ type: 'hotel', datedeb:'24/07/2025', datefin:'25/07/2025', coords:[12.107303, 49.014029] },
-		*/
         { desc:'An old tower', coords:[12.10843, 49.01792], src:'data/IMG/2025/Central Europe/Regensburg/IMG_20250725_121358.jpg', rotation: 304 },
         { desc:'Café Lorraine', coords:[12.10154, 49.01750], src:'data/IMG/2025/Central Europe/Regensburg/IMG_20250725_125458.jpg', rotation: 90 },
         { desc:'Map of the middle-age town', coords:[12.09781, 49.02095], src:'data/IMG/2025/Central Europe/Regensburg/IMG_20250725_150953.jpg', rotation: 210 },
@@ -514,9 +494,7 @@ const travels = [
 	  lng: 9.99064,
 	  zoom: 15,
 	  flatPhotos: [
-		/*
 		{ type: 'hotel', datedeb:'25/07/2025', datefin:'27/07/2025', coords:[9.983286, 48.39558] },
-		*/
         { desc:'No room...', coords:[9.983286, 48.39558], src:'data/IMG/2025/Central Europe/Ulm/IMG_20250726_031056.jpg', rotation: 5 },
         { desc:'The tallest cathedral in the world', coords:[9.990807, 48.39833], src:'data/IMG/2025/Central Europe/Ulm/IMG_20250726_143246.jpg', rotation: 69 },
         { desc:'The townhall', coords:[9.993648, 48.39700], src:'data/IMG/2025/Central Europe/Ulm/IMG_20250726_160509.jpg', rotation: 250 },
@@ -542,11 +520,9 @@ const travels = [
 	  lng: 138.59973,
 	  zoom: 13,
 	  flatPhotos: [
-		/*
 		{ type: 'hotel', datedeb:'06/12/2025', datefin:'13/12/2025', coords:[138.5928234706278,-34.92695859199718] },
         { type: 'hotel', datedeb:'13/12/2025', datefin:'18/12/2025', coords:[138.51148168154995,-35.0007250433274] },
         { type: 'hotel', datedeb:'18/12/2025', datefin:'20/12/2025', coords:[138.59888483173975,-34.92411928356853] },
-		*/
         { desc:'She gave me the macca\'s hat', coords:[138.5927458,-34.926958], src:'data/IMG/2025/Australia/Adelaide/IMG_20251207_112751.jpg'},
         { desc:'Emergency :)', coords:[138.586609,-34.921057], src:'data/IMG/2025/Australia/Adelaide/IMG_20251207_145221.jpg'},
         { desc:'Korean BBQ', coords:[138.59547,-34.9305], src:'data/IMG/2025/Australia/Adelaide/IMG_20251207_182656.jpg' },
