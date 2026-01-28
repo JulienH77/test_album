@@ -48,7 +48,7 @@ const baseMaps = {
   "Google Street": googleStreets,
 };
 
-const osmb = new OSMBuildings(map)
+const osmb = new OSMBuildings(map).addTo(map);
 
 const osmbLayer = L.layerGroup();
 
@@ -88,19 +88,25 @@ map.on('layeradd', function () {
     });
   }
 });
+let osmbLoaded = false;
+
 map.on('overlayadd', function (e) {
-  if (e.layer === osmbLayer) {
+  if (e.layer === osmbLayer && !osmbLoaded) {
     osmb.load(
       'https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json'
     );
+    osmbLoaded = true;
   }
 });
 
 map.on('overlayremove', function (e) {
   if (e.layer === osmbLayer) {
     osmb.remove();
+    osmbLoaded = false;
   }
 });
+
+
 
 map.whenReady(() => {
   setTimeout(() => {
