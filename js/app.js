@@ -49,7 +49,6 @@ const baseMaps = {
 };
 
 const osmb = new OSMBuildings(map)
-  .load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
 
 const osmbLayer = L.layerGroup();
 
@@ -91,7 +90,9 @@ map.on('layeradd', function () {
 });
 map.on('overlayadd', function (e) {
   if (e.layer === osmbLayer) {
-    osmb.addTo(map);
+    osmb.load(
+      'https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json'
+    );
   }
 });
 
@@ -100,7 +101,6 @@ map.on('overlayremove', function (e) {
     osmb.remove();
   }
 });
-
 
 map.whenReady(() => {
   setTimeout(() => {
