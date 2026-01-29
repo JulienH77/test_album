@@ -475,3 +475,90 @@ body {
 .custom-select.open .arrow {
     transform: rotate(180deg);
 }
+
+
+
+.trajet-popup-wrapper .leaflet-popup-content {
+  margin: 0;
+}
+
+.trajet-popup {
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  min-width: 280px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.18);
+}
+
+/* HEADER */
+.trajet-header {
+  padding: 14px 16px;
+  font-size: 12px;
+  letter-spacing: .08em;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.trajet-header.train   { background: #db0016; }
+.trajet-header.avion   { background: #00dbc5; }
+.trajet-header.bus     { background: #dbc500; color:#222; }
+.trajet-header.voiture { background: #0016db; }
+.trajet-header.bateau  { background: #0084db; }
+
+/* BODY */
+.trajet-body {
+  padding: 16px;
+}
+
+.trajet-line {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.trajet-line span:first-child {
+  color: #777;
+}
+
+.trajet-line span:last-child {
+  color: #111;
+  font-weight: 500;
+}
+
+/* SEPARATOR */
+.trajet-separator {
+  height: 1px;
+  background: #eee;
+  margin: 12px 0;
+}
+
+/* METRICS */
+.trajet-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.trajet-metrics .label {
+  display: block;
+  font-size: 11px;
+  color: #777;
+}
+
+.trajet-metrics .value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+}
+
+/* VOYAGE */
+.trajet-voyage {
+  margin-top: 14px;
+  font-size: 12px;
+  color: #666;
+  border-top: 1px solid #eee;
+  padding-top: 8px;
+}
