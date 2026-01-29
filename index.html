@@ -9,8 +9,6 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <!-- Grouped Layer Control CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet-groupedlayercontrol/dist/leaflet.groupedlayercontrol.min.css">
-  <!--OSMBuilding 3D-->
-  <script src="https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings-Leaflet.js"></script>
   
   <link rel="stylesheet" href="css/style.css" />
  
@@ -25,16 +23,16 @@
     <!-- SECTION A : VOYAGES -->
     <section id="trip-section">
       <h2 style="margin-top:-0.5em;">Voyages</h2>
-	 <div class="custom-select-wrapper">
-	 	<div class="custom-select">
-	 		<div class="custom-select-trigger">
-	 			<span id="selected-trip-label">Sélectionner un voyage...</span>
-	 			<span class="arrow">▼</span>
-	 		</div>
-	 		<div class="custom-options" id="custom-options-container">
-	 			</div>
-	 	</div>
-	 </div>
+	<div class="custom-select-wrapper">
+		<div class="custom-select">
+			<div class="custom-select-trigger">
+				<span id="selected-trip-label">Sélectionner un voyage...</span>
+				<span class="arrow">▼</span>
+			</div>
+			<div class="custom-options" id="custom-options-container">
+				</div>
+		</div>
+	</div>
     </section>
 
     <!-- SECTION B : CONTENU CONTEXTUEL -->
@@ -54,11 +52,13 @@
 
 <!-- Leaflet JS (TOUJOURS EN PREMIER) -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-polylinedecorator/1.6.0/leaflet.polylineDecorator.min.js"></script>
+
 
 <!-- Grouped Layer Control (APRÈS Leaflet) -->
 <script src="https://unpkg.com/leaflet-groupedlayercontrol/dist/leaflet.groupedlayercontrol.min.js"></script>
 
-<!-- OSMBuildings (APRÈS Leaflet) -->
+<!--OSMBuilding 3D-->
 <script src="https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings-Leaflet.js"></script>
 
 <!-- DATA -->
