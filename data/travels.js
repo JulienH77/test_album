@@ -701,5 +701,23 @@ const travels = [
 	  ]
 	  }
     ]
-  }
+  },
+
+
+
+	{
+    year: 2026,
+    id: "2026_bordeaux",
+    name: "January 2026 - Bordeaux",
+    cities: [
+      {
+	  id: "bordeaux",
+	  name: "Bordeaux",
+	  lat: 44.83789,
+	  lng: -0.57681,
+	  zoom: 13,
+	  flatPhotos: [
+         { desc:'Waiting for her laundry', coords:[11.60667, 48.12429], src:'data/IMG/2025/Central Europe/Munich/IMG_20250712_221519.jpg', rotation: 245 },
+	  ]
+	}
 ];
