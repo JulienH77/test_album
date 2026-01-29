@@ -384,3 +384,94 @@ body {
 .leaflet-control-layers input[type="range"] {
   width: 90%;
 }
+
+
+/* =========================================
+   CUSTOM DROPDOWN (MODERNE)
+   ========================================= */
+.custom-select-wrapper {
+    position: relative;
+    user-select: none;
+    width: 100%;
+    margin-bottom: 20px;
+    font-family: 'Segoe UI', sans-serif;
+}
+.custom-select {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+.custom-select-trigger {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px; /* Modifier le padding */
+    height: 50px; /* Fixer une hauteur */
+    font-size: 15px;
+    font-weight: 500;
+    color: #333;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.custom-select-trigger:hover {
+    border-color: #007AFF;
+    box-shadow: 0 4px 8px rgba(0,122,255,0.15);
+}
+.custom-options {
+    position: absolute;
+    top: 110%; /* Juste en dessous */
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 10000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+.custom-select.open .custom-options {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+.custom-option {
+    position: relative;
+    display: block;
+    padding: 12px 15px;
+    font-size: 14px;
+    color: #444;
+    cursor: pointer;
+    border-bottom: 1px solid #f5f5f5;
+    transition: background 0.2s;
+}
+.custom-option:last-child {
+    border-bottom: none;
+}
+.custom-option:hover {
+    background-color: #f0f7ff;
+    color: #007AFF;
+}
+.custom-option.selected {
+    background-color: #007AFF;
+    color: #fff;
+}
+.arrow {
+    font-size: 10px;
+    transition: transform 0.3s;
+    color: #888;
+}
+.custom-select.open .arrow {
+    transform: rotate(180deg);
+}
