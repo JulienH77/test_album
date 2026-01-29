@@ -1,80 +1,85 @@
 // ======================================================
-// 1. STATE & VARIABLES GLOBALES
+// STATE
 // ======================================================
 const state = {
   selectedTrip: null,
   selectedCity: null
 };
 
-let trajetsGeoJSON = null; // Stockera les données brutes
-let polylineDecoratorLayer = L.layerGroup(); // Pour les flèches
-
 // ======================================================
-// 2. INIT MAP & LAYERS
+// INIT MAP & LAYERS
 // ======================================================
-// Fonds de carte
 const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: 'Julien Houziaux | OSM'
 });
 
 const googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-  maxZoom: 20,
-  subdomains:['mt0','mt1','mt2','mt3'],
-  attribution: 'Julien Houziaux | Google Satellite'
-});
+    maxZoom: 20,
+    subdomains:['mt0','mt1','mt2','mt3'],
+	attribution: 'Julien Houziaux | Google Satellite'
+  }
+);
 
 const googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-  maxZoom: 20,
-  subdomains:['mt0','mt1','mt2','mt3'],
-  attribution: 'Julien Houziaux | Google Maps'
-});
+    maxZoom: 20,
+    subdomains:['mt0','mt1','mt2','mt3'],
+	attribution: 'Julien Houziaux | Google Maps'
+  }
+);
 
-// Initialisation Carte
 const map = L.map("map", {
   center: [20, 0],
   zoom: 2,
   layers: [osm]
 });
 
-// Hillshade (Relief)
 const hillshade = L.tileLayer(
   'https://services.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}',
-  { maxZoom: 13, attribution: 'Esri', opacity: 0.4 }
+  {
+    maxZoom: 13,
+    attribution: 'Esri',
+    opacity: 0.4
+  }
 );
 
-// Bâtiments 3D
-const osmb = new OSMBuildings(map).addTo(map);
-const osmbLayer = L.layerGroup();
-let osmbLoaded = false;
-
-// Contrôle des couches (Layers Control)
 const baseMaps = {
   "OpenStreetMap": osm,
   "Google Satellite": googleSat,
   "Google Street": googleStreets,
 };
 
-const hillshadeLabel = `<span>Relief</span><div style="margin-left:22px; margin-top:4px;"><input type="range" min="0" max="1" step="0.05" value="0.4" id="hillshadeOpacity"></div>`;
+const osmb = new OSMBuildings(map).addTo(map);
+
+const osmbLayer = L.layerGroup();
+
+const hillshadeLabel = `
+  <span>Relief</span>
+  <div style="margin-left:22px; margin-top:4px;">
+    <input
+      type="range"
+      min="0"
+      max="1"
+      step="0.05"
+      value="0.4"
+      id="hillshadeOpacity"
+    >
+  </div>
+`;
 
 const groupedOverlays = {
-  "hillshade": { [hillshadeLabel]: hillshade },
-  "3D building": { "Bâtiments 3D": osmbLayer }
-};
+  "hillshade": {
+    [hillshadeLabel]: hillshade
+  },
+  "3D building": {
+    "Bâtiments 3D": osmbLayer
+  }};
 
-L.control.groupedLayers(baseMaps, groupedOverlays, { collapsed: true }).addTo(map);
+L.control.groupedLayers(
+  baseMaps,
+  groupedOverlays,
+  { collapsed: true }
+).addTo(map);
 
-// Echelle
-L.control.scale({ imperial: true, metric: true, position: 'bottomright' }).addTo(map);
-
-// Groupes de calques (Z-Index implicite par ordre d'ajout)
-const trajetLayer = L.layerGroup().addTo(map);
-polylineDecoratorLayer.addTo(map); // Flèches par dessus les lignes
-const cityLayer   = L.layerGroup().addTo(map);
-const photoLayer  = L.layerGroup().addTo(map);
-
-// ======================================================
-// 3. LOGIQUE RELIEF & 3D (Events)
-// ======================================================
 map.on('layeradd', function () {
   const slider = document.getElementById('hillshadeOpacity');
   if (slider) {
@@ -83,10 +88,13 @@ map.on('layeradd', function () {
     });
   }
 });
+let osmbLoaded = false;
 
 map.on('overlayadd', function (e) {
   if (e.layer === osmbLayer && !osmbLoaded) {
-    osmb.load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
+    osmb.load(
+      'https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json'
+    );
     osmbLoaded = true;
   }
 });
@@ -98,18 +106,73 @@ map.on('overlayremove', function (e) {
   }
 });
 
+
+
 map.whenReady(() => {
   setTimeout(() => {
     const slider = document.getElementById('hillshadeOpacity');
     if (!slider) return;
+
+    // Empêche Leaflet de capter les events
     L.DomEvent.disableClickPropagation(slider);
     L.DomEvent.disableScrollPropagation(slider);
-    slider.addEventListener('input', e => hillshade.setOpacity(e.target.value));
+
+    slider.addEventListener('input', e => {
+      hillshade.setOpacity(e.target.value);
+    });
   }, 300);
 });
 
+
+// Affiche KM et Miles (imperial: true)
+L.control.scale({ imperial: true, metric: true, position: 'bottomright' }).addTo(map);
+
 // ======================================================
-// 4. LEGENDE (Définition avant usage)
+// LEAFLET LAYERS (ordre important)
+// ======================================================
+const trajetLayer = L.layerGroup().addTo(map);
+const cityLayer   = L.layerGroup().addTo(map);
+const photoLayer  = L.layerGroup().addTo(map);
+
+// ======================================================
+// LOAD TRAJETS GEOJSON
+// ======================================================
+let trajetsGeoJSON = null;
+
+fetch("data/GEOJSON/TRAJETS_ALL_vacances_wgs.geojson")
+  .then(r => {
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return r.json();
+  })
+  .then(data => {
+    trajetsGeoJSON = data;
+	// --- AJOUTER CETTE LIGNE ICI ---
+    legend.addTo(map); // La légende apparaît dès que les trajets sont chargés
+  })
+  
+  .catch(err => console.error("Erreur chargement trajets :", err));
+
+// ======================================================
+// TRAJET STYLE
+// ======================================================
+function trajetStyle(feature) {
+  const colors = {
+    avion: "#00dbc5",
+    train: "#db0016",
+    bus: "#dbc500",
+    voiture: "#0016db",
+    bateau: "#0084db"
+  };
+
+  return {
+    color: colors[feature.properties.trajet] || "#666",
+    weight: 3,
+    opacity: 1
+  };
+}
+
+// ======================================================
+// LEGENDE TRAJETS
 // ======================================================
 const legend = L.control({ position: 'bottomleft' });
 
@@ -117,205 +180,140 @@ legend.onAdd = function (map) {
   const div = L.DomUtil.create('div', 'info legend');
   const grades = ["avion", "train", "bus", "voiture", "bateau"];
   const colors = {
-    avion: "#00dbc5", train: "#db0016", bus: "#dbc500", voiture: "#0016db", bateau: "#0084db"
+    avion: "#00dbc5",
+    train: "#db0016",
+    bus: "#dbc500",
+    voiture: "#0016db",
+    bateau: "#0084db"
   };
+  const labels = [];
+
   div.innerHTML += '<strong>Transports</strong><br>';
+
   grades.forEach(mode => {
-    // Style "ligne" défini dans le CSS
-    div.innerHTML += `<i style="background:${colors[mode]}"></i> ${mode.charAt(0).toUpperCase() + mode.slice(1)}<br>`;
+    div.innerHTML +=
+      '<i style="background:' + colors[mode] + '"></i> ' +
+      mode.charAt(0).toUpperCase() + mode.slice(1) + '<br>';
   });
+
   return div;
 };
 
-// ======================================================
-// 5. CHARGEMENT DONNÉES (GeoJSON)
-// ======================================================
-fetch("data/GEOJSON/TRAJETS_ALL_vacances_wgs.geojson")
-  .then(r => {
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    return r.json();
-  })
-  .then(data => {
-    trajetsGeoJSON = data; // On stocke juste les données, on n'affiche rien au démarrage
-    console.log("GeoJSON chargé avec succès.");
-    // La légende est ajoutée ici pour être prête, mais on pourrait aussi l'ajouter dans loadTrip
-    legend.addTo(map); 
-  })
-  .catch(err => console.error("Erreur chargement trajets :", err));
+/*legend.addTo(map);*/
+
+
+
 
 
 // ======================================================
-// 6. FONCTIONS D'AFFICHAGE TRAJET (Style, Popup, Flèches)
+// SHOW TRAJETS FOR ONE TRIP
 // ======================================================
-
-function trajetStyle(feature) {
-  const colors = {
-    avion: "#00dbc5", train: "#db0016", bus: "#dbc500", voiture: "#0016db", bateau: "#0084db"
-  };
-  return {
-    color: colors[feature.properties.trajet] || "#666",
-    weight: 4, // Un peu plus épais pour voir les flèches
-    opacity: 0.8
-  };
-}
-
-// Fonction principale pour afficher un voyage sur la carte
 function showTrajetsForTrip(trip) {
-  // 1. Nettoyage
+  // 1. On vide le groupe de calques existant (trajetLayer est défini en haut de votre fichier)
   trajetLayer.clearLayers();
-  polylineDecoratorLayer.clearLayers();
 
   if (!trajetsGeoJSON) {
-    console.error("GeoJSON pas encore chargé.");
+    console.error("Les données GeoJSON ne sont pas encore chargées.");
     return;
   }
 
-  // 2. Filtrer les trajets correspondants au voyage
+  // 2. FILTRE : On compare l'ID du voyage (ou le name selon votre GeoJSON)
+  // Vérifiez si votre GeoJSON utilise l'ID (2025_china) ou le nom (May 2025 - China)
   const trajetsFiltres = trajetsGeoJSON.features.filter(
     feature => feature.properties.voyage === trip.id || feature.properties.voyage === trip.name
   );
 
-  // 3. Création de la couche GeoJSON avec POPUPS MODERNES
+  console.log("Trajets trouvés pour " + trip.name + " :", trajetsFiltres.length);
+
+  // 3. AJOUT À LA CARTE
   const geojsonLayer = L.geoJSON(trajetsFiltres, {
-    style: trajetStyle,
-    onEachFeature: function(feature, layer) {
-        // --- POPUP PRO ---
-        const p = feature.properties;
-        const colors = { avion: "#00dbc5", train: "#db0016", bus: "#dbc500", voiture: "#0016db", bateau: "#0084db" };
-        const icons = { avion: "✈️", train: "🚆", bus: "🚌", voiture: "🚗", bateau: "🚢" };
-        
-        const type = p.trajet ? p.trajet.toLowerCase() : 'autre';
-        const bgColor = colors[type] || '#333';
-        const icon = icons[type] || '📍';
-        const dateDeb = p.date_deb ? new Date(p.date_deb).toLocaleDateString('fr-FR', {day:'numeric', month:'short'}) : '?';
-        
-        const popupContent = `
-          <div class="trip-popup-card">
-              <div class="trip-popup-header" style="background-color: ${bgColor}">
-                  <span>${p.trajet ? p.trajet.toUpperCase() : 'TRAJET'}</span>
-                  <div class="trip-popup-icon">${icon}</div>
-              </div>
-              <div class="trip-popup-body">
-                   <div class="trip-stat"><span class="label">Date</span><span class="value">${dateDeb}</span></div>
-                   <div class="trip-stat"><span class="label">Durée</span><span class="value">${p.duree || '-'}</span></div>
-                   <div class="trip-stat"><span class="label">Distance</span><span class="value">${p.distanceKM ? Math.round(p.distanceKM) + ' km' : '-'}</span></div>
-                   <div class="trip-stat"><span class="label">Voyage</span><span class="value" style="font-size:11px">${p.voyage || ''}</span></div>
-              </div>
-          </div>`;
-        
-        layer.bindPopup(popupContent);
-    }
+    style: function(feature) {
+      // On passe l'objet feature complet ici
+      return trajetStyle(feature);
+    },
+onEachFeature: function (feature, layer) {
+  const p = feature.properties;
+
+  const html = `
+    <div class="trajet-popup">
+      <div class="trajet-header ${p.trajet}">
+        ${p.trajet.toUpperCase()}
+      </div>
+
+      <div class="trajet-body">
+        <div class="trajet-line">
+          <span>Départ</span>
+          <span>${formatDateTime(p.date_deb)}</span>
+        </div>
+        <div class="trajet-line">
+          <span>Arrivée</span>
+          <span>${formatDateTime(p.date_fin)}</span>
+        </div>
+
+        <div class="trajet-separator"></div>
+
+        <div class="trajet-metrics">
+          <div>
+            <span class="label">Durée</span>
+            <span class="value">${p.duree}</span>
+          </div>
+          <div>
+            <span class="label">Distance</span>
+            <span class="value">${p.distanceKM} km</span>
+          </div>
+        </div>
+
+        <div class="trajet-voyage">${p.voyage}</div>
+      </div>
+    </div>
+  `;
+
+  layer.bindPopup(html, {
+    maxWidth: 320,
+    className: "trajet-popup-wrapper"
+  });
+}
   });
 
-  // 4. Ajout des Lignes
+  // On ajoute le geojson au groupe trajetLayer
   trajetLayer.addLayer(geojsonLayer);
-
-  // 5. Ajout des FLÈCHES (PolylineDecorator)
-  const arrows = [];
-  geojsonLayer.eachLayer(function(layer) {
-      if (layer instanceof L.Polyline) {
-          const decorator = L.polylineDecorator(layer, {
-              patterns: [{
-                  offset: '100%',     
-                  repeat: '150px',    // Espacement des flèches
-                  symbol: L.Symbol.arrowHead({
-                      pixelSize: 12,  
-                      polygon: false, 
-                      pathOptions: { stroke: true, color: 'white', weight: 2, opacity: 1 }
-                  })
-              }]
-          });
-          arrows.push(decorator);
-      }
-  });
-  
-  // Ajout du groupe de flèches
-  const groupArrows = L.layerGroup(arrows);
-  polylineDecoratorLayer.addLayer(groupArrows);
 }
 
-// ======================================================
-// 7. GESTION DU MENU DÉROULANT & CHARGEMENT VOYAGE
-// ======================================================
 
-// C'est la fonction qui manquait pour faire le lien !
-function loadTrip(tripId) {
-    // 1. Trouver le voyage dans la liste travels.js
-    const trip = travels.find(t => t.id === tripId);
-    if (!trip) return;
 
-    // 2. Mise à jour du state
-    state.selectedTrip = trip;
-    state.selectedCity = null;
 
-    // 3. Reset interface
-    closeCities(); // Ferme les détails d'avant
-    
-    // 4. Afficher Trajets + Villes + Sidebar
-    showTrajetsForTrip(trip);
-    showCities(trip);
-    renderCities();
-    zoomToTrip(trip);
-}
 
-function initTripList() {
-  const container = document.getElementById('custom-options-container');
-  const trigger = document.querySelector('.custom-select-trigger');
-  const wrapper = document.querySelector('.custom-select');
-  const label = document.getElementById('selected-trip-label');
-
-  if (!container || !trigger) return; 
-
-  travels.forEach(trip => {
-    const option = document.createElement('div');
-    option.className = 'custom-option';
-    option.textContent = trip.name; 
-    option.dataset.value = trip.id;
-    
-    option.addEventListener('click', () => {
-        label.textContent = trip.name;
-        document.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
-        option.classList.add('selected');
-        wrapper.classList.remove('open');
-        
-        // APPEL DE LA FONCTION DE CHARGEMENT
-        loadTrip(trip.id);
-    });
-
-    container.appendChild(option);
-  });
-
-  trigger.addEventListener('click', () => wrapper.classList.toggle('open'));
-  document.addEventListener('click', (e) => {
-      if (!wrapper.contains(e.target)) wrapper.classList.remove('open');
-  });
-}
 
 // ======================================================
-// 8. LOGIQUE VILLES & PHOTOS
+// SHOW CITIES (points + labels)
 // ======================================================
-
 function showCities(trip) {
   cityLayer.clearLayers();
+
   trip.cities.forEach(city => {
-    // Point blanc
+    // point
     const marker = L.circleMarker([city.lat, city.lng], {
-      radius: 6, fillColor: "#fff", fillOpacity: 1, color: "#000", weight: 2
+      radius: 7,
+      fillColor: "#fff",
+      fillOpacity: 1,
+      color: "#000",
+      weight: 3
     });
 
-    // Label texte
+    // label
     const label = L.marker([city.lat, city.lng], {
       icon: L.divIcon({
         className: "city-label",
         html: `<span>${city.name}</span>`,
-        iconSize: [120, 24], iconAnchor: [60, 36]
+        iconSize: [120, 24],
+        iconAnchor: [60, 36]
       }),
       interactive: false
     });
 
     marker.on("click", () => {
-       // Scroll automatique vers la ville dans la sidebar
-       toggleCity(city);
+      const cityDiv = document.querySelector(`[data-city="${city.id}"]`);
+      toggleCity(city, cityDiv);
     });
 
     cityLayer.addLayer(marker);
@@ -323,23 +321,130 @@ function showCities(trip) {
   });
 }
 
+// ======================================================
+// MENU DÉROULANT VOYAGES (CUSTOM SELECT)
+// ======================================================
+
+// Charge un voyage
+function loadTrip(tripId) {
+  const trip = travels.find(t => t.id === tripId);
+  if (!trip) return;
+
+  state.selectedTrip = trip;
+  state.selectedCity = null;
+
+  closeCities();
+  photoLayer.clearLayers();
+
+  showTrajetsForTrip(trip);
+  showCities(trip);
+  renderCities();
+
+requestAnimationFrame(() => {
+  map.invalidateSize();
+  map.fitBounds(
+    trip.cities.map(c => [c.lat, c.lng]),
+    { padding: [40, 40] }
+  );
+});
+
+
+}
+
+
+// Initialise la liste déroulante
+function initTripList() {
+  const container = document.getElementById('custom-options-container');
+  const trigger   = document.querySelector('.custom-select-trigger');
+  const wrapper   = document.querySelector('.custom-select');
+  const label     = document.getElementById('selected-trip-label');
+
+  if (!container || !trigger || !wrapper || !label) return;
+
+  travels.forEach(trip => {
+    const option = document.createElement('div');
+    option.className = 'custom-option';
+    option.textContent = trip.name;
+    option.dataset.value = trip.id;
+
+    option.addEventListener('click', () => {
+      label.textContent = trip.name;
+
+      document
+        .querySelectorAll('.custom-option')
+        .forEach(o => o.classList.remove('selected'));
+
+      option.classList.add('selected');
+      wrapper.classList.remove('open');
+
+      loadTrip(trip.id);
+    });
+
+    container.appendChild(option);
+  });
+
+  // Ouvrir / fermer
+  trigger.addEventListener('click', () => {
+    wrapper.classList.toggle('open');
+  });
+
+  // Click extérieur = fermeture
+  document.addEventListener('click', (e) => {
+    if (!wrapper.contains(e.target)) {
+      wrapper.classList.remove('open');
+    }
+  });
+}
+
+// ======================================================
+// INITIALISATION
+// ======================================================
+initTripList();
+
+
+// ======================================================
+// SELECT TRIP
+// ======================================================
+function selectTrip(trip, li) {
+  closeCities();
+  state.selectedTrip = trip;
+  state.selectedCity = null;
+
+  document.querySelectorAll("#trip-list li")
+    .forEach(el => el.classList.remove("active"));
+  li.classList.add("active");
+
+  photoLayer.clearLayers();
+
+  showTrajetsForTrip(trip);
+  showCities(trip);
+  renderCities();
+  zoomToTrip(trip);
+}
+
+// ======================================================
+// RENDER CITIES SIDEBAR (Version Accordéon)
+// ======================================================
 function renderCities() {
-  const contentEl = document.getElementById("content-section");
-  contentEl.innerHTML = "";
 
   state.selectedTrip.cities.forEach(city => {
+    // Conteneur global de la ville (Card + Galerie)
     const cityWrapper = document.createElement("div");
     cityWrapper.className = "city-wrapper";
     cityWrapper.id = `wrapper-${city.id}`;
 
+    // La carte visuelle
     const cityCard = document.createElement("div");
     cityCard.className = "city-card";
-    // Assurez-vous que les images existent dans ce dossier
     const imgPath = `data/IMG/VillesVisitees/${city.id}.jpg`;
     cityCard.style.backgroundImage = `url('${imgPath}')`;
 
-    cityCard.innerHTML = `<div class="city-overlay"></div><span class="city-name">${city.name}</span>`;
+    cityCard.innerHTML = `
+      <div class="city-overlay"></div>
+      <span class="city-name">${city.name}</span>
+    `;
 
+    // Zone où la galerie apparaîtra
     const galleryContainer = document.createElement("div");
     galleryContainer.className = "city-gallery-container";
     galleryContainer.id = `gallery-${city.id}`;
@@ -348,23 +453,25 @@ function renderCities() {
 
     cityWrapper.appendChild(cityCard);
     cityWrapper.appendChild(galleryContainer);
-    contentEl.appendChild(cityWrapper);
   });
 }
 
+// ======================================================
+// TOGGLE CITY (AUTO-SORT & LAZY LOAD & HOTELS)
+// ======================================================
 function toggleCity(city) {
   const galleryDiv = document.getElementById(`gallery-${city.id}`);
   const wrapper = document.getElementById(`wrapper-${city.id}`);
   
   const isSameCity = (state.selectedCity && state.selectedCity.id === city.id);
 
-  closeCities(); // Ferme tout
+  closeCities(); 
 
-  if (isSameCity) return; // Si c'est la même, on a juste fermé, on arrête
+  if (isSameCity) return;
 
   state.selectedCity = city;
 
-  // Masquer les points blancs des villes pour éviter la superposition
+  // Masquer les points blancs des villes
   if (map.hasLayer(cityLayer)) map.removeLayer(cityLayer);
   map.closePopup();
 
@@ -373,52 +480,55 @@ function toggleCity(city) {
   if (city.flatPhotos) {
     allItems = city.flatPhotos.map(p => ({
       ...p,
-      dateObj: getDateFromFilename(p.src) 
+      dateObj: p.src ? getDateFromFilename(p.src) : null // Les hotels n'ont pas forcément de src
     }));
   } else if (city.days) {
     allItems = city.days.flatMap(d => d.photos.map(p => ({...p, dateObj: new Date(d.date)})));
   }
 
-  // 2. Séparer Hôtels / Photos
+  // 2. Séparer les Hôtels des Photos
   const hotels = allItems.filter(item => item.type === 'hotel');
   const photos = allItems.filter(item => item.type !== 'hotel');
 
-  // 3. Afficher les HOTELS (Z-Index élevé)
-  hotels.forEach(h => {
+// 3. Afficher les HOTELS (Point 2 : On les ajoute APRÈS ou avec un Z-index élevé)
+hotels.forEach(h => {
     if(!h.coords) return;
     const hotelIcon = L.divIcon({
         className: 'custom-hotel-icon',
         html: '🏢',
-        iconSize: [24, 24], iconAnchor: [12, 12]
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
     });
     
     L.marker([h.coords[1], h.coords[0]], {
-       icon: hotelIcon,
-       zIndexOffset: 1000 // Au-dessus
-    })
+	   icon: hotelIcon,
+       zIndexOffset: 1000 // Force l'affichage par-dessus les photos
+	})
       .bindPopup(`<b>Hôtel</b><br>Du: ${h.datedeb || '?'}<br>Au: ${h.datefin || '?'}`)
       .addTo(photoLayer);
+
   });
 
-  // 4. Afficher les PHOTOS
+  // 4. Afficher les PHOTOS (Version "Jolie" avec CSS)
+  // On trie les photos chronologiquement
   photos.forEach(photo => {
       if (!photo.coords) return;
       const photoIcon = L.divIcon({
-          className: 'photo-marker-icon', // Style CSS bleu
-          iconSize: [10, 10], 
+          className: 'photo-marker-icon', // On va changer le style dans le CSS
+          iconSize: [12, 12], 
           iconAnchor: [5, 5]
       });
-      
-      const marker = L.marker([photo.coords[1], photo.coords[0]], { 
+	  
+  const marker = L.marker([photo.coords[1], photo.coords[0]], { 
           icon: photoIcon,
-          zIndexOffset: 500 // En dessous
+          zIndexOffset: 500 // En dessous des hôtels
       });
       
       marker.on("click", () => openPhotoPopup(photo));
       photoLayer.addLayer(marker);
   });
 
-  // 5. Génération HTML Galerie
+  // 5. Génération HTML (Galerie) - On n'affiche que les photos, pas les hotels
   const photosByDay = {};
   photos.forEach(photo => {
     if (!photo.dateObj) return; 
@@ -461,64 +571,89 @@ function toggleCity(city) {
     wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 50);
 
+  // Utiliser le zoom spécifique ou defaut (Point 2)
   zoomOnCity(city);
 }
 
 // ======================================================
-// 9. UTILITAIRES & CLOSE
+// UTILITAIRE : Extraction Date depuis Filename
 // ======================================================
-
 function getDateFromFilename(src) {
-  if (!src) return new Date();
+  // Cherche le motif IMG_YYYYMMDD_HHMMSS
+  // Exemple: IMG_20250519_221420.jpg
   const match = src.match(/IMG_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
+  
   if (match) {
+    // new Date(Year, MonthIndex (0-11), Day, Hour, Min, Sec)
     return new Date(match[1], match[2] - 1, match[3], match[4], match[5], match[6]);
   }
+  
+  // Fallback : Si le nom ne correspond pas, on renvoie une date par défaut (ou null)
   return new Date(); 
 }
 
+// ======================================================
+// CLOSE CITIES (Réinitialisation)
+// ======================================================
 function closeCities() {
+  // 1. Fermer les galeries sidebar
   document.querySelectorAll(".city-gallery-container").forEach(el => {
     el.classList.remove("active");
     el.innerHTML = "";
   });
-  photoLayer.clearLayers(); 
-  map.closePopup();         
+
+  // 2. Nettoyer la carte
+  photoLayer.clearLayers(); // Enlève les points rouges
+  map.closePopup();         // Ferme les popups photos
+
+  // 3. Ré-afficher les points blancs des villes (si un voyage est sélectionné)
   if (state.selectedTrip) {
-    if (!map.hasLayer(cityLayer)) map.addLayer(cityLayer);
+    if (!map.hasLayer(cityLayer)) {
+      map.addLayer(cityLayer);
+    }
   }
+  photoLayer.clearLayers();
+  state.selectedCity = null;
 }
 
+
+// ======================================================
+// MAP HELPERS
+// ======================================================
 function zoomToTrip(trip) {
-  if(trip.cities && trip.cities.length > 0) {
-     map.fitBounds(trip.cities.map(c => [c.lat, c.lng]), { padding: [50, 50] });
-  }
+  map.fitBounds(trip.cities.map(c => [c.lat, c.lng]), { padding: [40, 40] });
 }
 
 function zoomOnCity(city) {
+  // Utilise city.zoom s'il existe, sinon 12 par défaut
   const zoomLevel = city.zoom || 12;
   map.setView([city.lat, city.lng], zoomLevel);
 }
 
 // ======================================================
-// 10. PHOTO POPUP (FULLSCREEN)
+// PHOTO POPUP + FULLSCREEN
 // ======================================================
 function openPhotoPopup(photo) {
-  const d = getDateFromFilename(photo.src);
+  const d = extractDateFromFilename(photo.src);
   const dateStr = d ? d.toLocaleString("fr-FR") : "";
 
-  const html = `
+const html = `
     <div class="leaflet-photo-popup">
       <div class="popup-desc">${photo.desc || ""}</div>
       <div class="popup-img-wrapper">
         <img src="${photo.src}">
-        <button class="popup-fullscreen-btn" onclick="openFullscreen('${photo.src}')">⤢</button>
+        <button class="popup-fullscreen-btn"
+          onclick="openFullscreen('${photo.src}')">⤢</button>
       </div>
       <div class="popup-date">${dateStr}</div>
     </div>
   `;
 
-  L.popup({ maxWidth: 550, minWidth: 300, className: 'custom-popup' })
+  L.popup({ 
+    maxWidth: 550,
+    minWidth: 300,
+    className: 'custom-popup'
+  })
     .setLatLng([photo.coords[1], photo.coords[0]])
     .setContent(html)
     .openOn(map);
@@ -536,22 +671,50 @@ function closeFullscreen() {
 }
 
 // ======================================================
-// 11. GESTION ZOOM LABELS
+// UTILITIES
+// ======================================================
+function formatDate(dateStr) {
+  return new Date(dateStr).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+}
+function formatDateTime(dateStr) {
+  if (!dateStr) return "—";
+  const d = new Date(dateStr);
+  return d.toLocaleString("fr-FR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function extractDateFromFilename(src) {
+  const m = src.match(/IMG_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
+  if (!m) return null;
+  return new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}`);
+}
+
+
+// ======================================================
+// GESTION ZOOM LABELS
 // ======================================================
 map.on('zoomend', function() {
   const currentZoom = map.getZoom();
   const mapDiv = document.getElementById('map');
+  
+  // Si le zoom est inférieur à 5 (trop haut), on cache les labels
   if (currentZoom < 5) {
     mapDiv.classList.add('map-zoomed-out');
   } else {
     mapDiv.classList.remove('map-zoomed-out');
   }
 });
+
+// Appel initial
 if(map.getZoom() < 5) {
     document.getElementById('map').classList.add('map-zoomed-out');
 }
-
-// ======================================================
-// 12. INITIALISATION FINALE
-// ======================================================
-initTripList();
