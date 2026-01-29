@@ -214,109 +214,81 @@ legend.onAdd = function (map) {
 // ======================================================
 // SHOW TRAJETS FOR ONE TRIP
 // ======================================================
+
 function showTrajetsForTrip(trip) {
-  // 1. On vide le groupe de calques existant (trajetLayer est défini en haut de votre fichier)
   trajetLayer.clearLayers();
 
-  if (!trajetsGeoJSON) {
-    console.error("Les données GeoJSON ne sont pas encore chargées.");
-    return;
-  }
+  if (!trajetsGeoJSON) return;
 
-  // 2. FILTRE : On compare l'ID du voyage (ou le name selon votre GeoJSON)
-  // Vérifiez si votre GeoJSON utilise l'ID (2025_china) ou le nom (May 2025 - China)
   const trajetsFiltres = trajetsGeoJSON.features.filter(
-    feature => feature.properties.voyage === trip.id || feature.properties.voyage === trip.name
+    f => f.properties.voyage === trip.id || f.properties.voyage === trip.name
   );
 
-  console.log("Trajets trouvés pour " + trip.name + " :", trajetsFiltres.length);
-
-  // 3. AJOUT À LA CARTE
   const geojsonLayer = L.geoJSON(trajetsFiltres, {
-    style: function(feature) {
-      // On passe l'objet feature complet ici
-      return trajetStyle(feature);
-    },
-onEachFeature: function (feature, layer) {
-  const p = feature.properties;
-  // Ligne cliquable invisible
-  const hitbox = L.polyline(layer.getLatLngs(), {
-    color: '#000',
-    opacity: 0,
-    weight: 15,        // LARGE zone cliquable
-    interactive: true
-  });
+    style: trajetStyle,
 
-  hitbox.bindPopup(layer.getPopup());
+    onEachFeature: function (feature, layer) {
+      const p = feature.properties;
 
-  trajetLayer.addLayer(hitbox);
-}
-  const html = `
-    <div class="trajet-popup">
-      <div class="trajet-header ${p.trajet}">
-        ${p.trajet.toUpperCase()}
-      </div>
-
-      <div class="trajet-body">
-        <div class="trajet-line">
-          <span>Départ</span>
-          <span>${formatDateTime(p.date_deb)}</span>
-        </div>
-        <div class="trajet-line">
-          <span>Arrivée</span>
-          <span>${formatDateTime(p.date_fin)}</span>
-        </div>
-
-        <div class="trajet-separator"></div>
-
-        <div class="trajet-metrics">
-          <div>
-            <span class="label">Durée</span>
-            <span class="value">${p.duree}</span>
+      const html = `
+        <div class="trajet-popup">
+          <div class="trajet-header ${p.trajet}">
+            ${p.trajet.toUpperCase()}
           </div>
-          <div>
-            <span class="label">Distance</span>
-            <span class="value">${p.distanceKM} km</span>
+          <div class="trajet-body">
+            <div class="trajet-line">
+              <span>Départ</span>
+              <span>${formatDateTime(p.date_deb)}</span>
+            </div>
+            <div class="trajet-line">
+              <span>Arrivée</span>
+              <span>${formatDateTime(p.date_fin)}</span>
+            </div>
+            <div class="trajet-metrics">
+              <div>Durée : ${p.duree}</div>
+              <div>Distance : ${p.distanceKM} km</div>
+            </div>
           </div>
         </div>
+      `;
 
-        <div class="trajet-voyage">${p.voyage}</div>
-      </div>
-    </div>
-  `;
+      layer.bindPopup(html);
 
-  layer.bindPopup(html, {
-    maxWidth: 320,
-    className: "trajet-popup-wrapper"
+      // HITBOX invisible pour clic
+      const hitbox = L.polyline(layer.getLatLngs(), {
+        color: '#000',
+        opacity: 0,
+        weight: 15,
+        interactive: true
+      });
+
+      hitbox.bindPopup(html);
+      trajetLayer.addLayer(hitbox);
+    }
   });
-}
-  });
-geojsonLayer.eachLayer(layer => {
-  if (!(layer instanceof L.Polyline)) return;
 
-  const decorator = L.polylineDecorator(layer, {
-    patterns: [
-      {
+  geojsonLayer.eachLayer(layer => {
+    if (!(layer instanceof L.Polyline)) return;
+
+    const decorator = L.polylineDecorator(layer, {
+      patterns: [{
         offset: '5%',
         repeat: '12%',
         symbol: L.Symbol.arrowHead({
-          pixelSize: 6,
+          pixelSize: 7,
           polygon: false,
           pathOptions: {
             stroke: true,
             color: layer.options.color,
-            weight: 2,
-            opacity: 0.9
+            weight: 2
           }
         })
-      }
-    ]
+      }]
+    });
+
+    trajetLayer.addLayer(decorator);
   });
 
-  trajetLayer.addLayer(decorator);
-});
-
-  // On ajoute le geojson au groupe trajetLayer
   trajetLayer.addLayer(geojsonLayer);
 }
 
