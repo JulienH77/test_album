@@ -163,13 +163,19 @@ function trajetStyle(feature) {
     voiture: "#0016db",
     bateau: "#0084db"
   };
+	
+map.createPane('trajetsPane');
+map.getPane('trajetsPane').style.zIndex = 450;
 
   return {
+    pane: 'trajetsPane',
     color: colors[feature.properties.trajet] || "#666",
     weight: 3,
-    opacity: 1
+    opacity: 1,
+    offset: feature.properties.sens === "retour" ? 3 : -3
   };
 }
+
 
 // ======================================================
 // LEGENDE TRAJETS
@@ -233,7 +239,18 @@ function showTrajetsForTrip(trip) {
     },
 onEachFeature: function (feature, layer) {
   const p = feature.properties;
+  // Ligne cliquable invisible
+  const hitbox = L.polyline(layer.getLatLngs(), {
+    color: '#000',
+    opacity: 0,
+    weight: 15,        // LARGE zone cliquable
+    interactive: true
+  });
 
+  hitbox.bindPopup(layer.getPopup());
+
+  trajetLayer.addLayer(hitbox);
+}
   const html = `
     <div class="trajet-popup">
       <div class="trajet-header ${p.trajet}">
@@ -274,6 +291,30 @@ onEachFeature: function (feature, layer) {
   });
 }
   });
+geojsonLayer.eachLayer(layer => {
+  if (!(layer instanceof L.Polyline)) return;
+
+  const decorator = L.polylineDecorator(layer, {
+    patterns: [
+      {
+        offset: '5%',
+        repeat: '12%',
+        symbol: L.Symbol.arrowHead({
+          pixelSize: 6,
+          polygon: false,
+          pathOptions: {
+            stroke: true,
+            color: layer.options.color,
+            weight: 2,
+            opacity: 0.9
+          }
+        })
+      }
+    ]
+  });
+
+  trajetLayer.addLayer(decorator);
+});
 
   // On ajoute le geojson au groupe trajetLayer
   trajetLayer.addLayer(geojsonLayer);
