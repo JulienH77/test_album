@@ -725,7 +725,18 @@ const travels = [
 	  lng: -0.57681,
 	  zoom: 13,
 	  flatPhotos: [
-         { desc:'Waiting for her laundry', coords:[11.60667, 48.12429], src:'data/IMG/2025/Central Europe/Munich/IMG_20250712_221519.jpg', rotation: 245 },
+         { desc:'Disney !', coords:[2.78279, 48.86936], src:'data/IMG/2026/Paris-Bordeaux/Bordeaux/IMG_20260128_065848.jpg', rotation: 0 },
+         { desc:'In the train', coords:[2.54473, 48.72565], src:'data/IMG/2026/Paris-Bordeaux/Bordeaux/IMG_20260128_075815.jpg', rotation: 0 },
+         { desc:'At my friend\'s restaurant', coords:[-0.551082, 44.862841], src:'data/IMG/2026/Paris-Bordeaux/Bordeaux/IMG_20260128_124857.jpg', rotation: 0 },
+         { desc:'At my friend\'s restaurant', coords:[-0.551082, 44.862841], src:'data/IMG/2026/Paris-Bordeaux/Bordeaux/IMG_20260128_124900.jpg', rotation: 0 },
+         { desc:'At my friend\'s restaurant', coords:[-0.551082, 44.862841], src:'data/IMG/2026/Paris-Bordeaux/Bordeaux/IMG_20260128_130019.jpg', rotation: 0 },
+         { desc:'The cathedral', coords:[-0.577294, 44.837661], src:'data/IMG/2026/Paris-Bordeaux/Bordeaux/IMG_20260128_151548.jpg', rotation: 0 },
+         { desc:'WOOOOW i like this one !', coords:[-0.573254, 44.83570], src:'data/IMG/2026/Paris-Bordeaux/Bordeaux/IMG_20260128_153509.jpg', rotation: 0 },
+         { desc:'WOOOOW i like this one !', coords:[-0.573254, 44.83570], src:'data/IMG/2026/Paris-Bordeaux/Bordeaux/IMG_20260128_153641.jpg', rotation: 0 },
+         { desc:'Porte d\'Aquitaine', coords:[-0.572764, 44.8309], src:'data/IMG/2026/Paris-Bordeaux/Bordeaux/IMG_20260128_160630.jpg', rotation: 0 },
+         { desc:'View from the bridge', coords:[-0.562778, 44.838537], src:'data/IMG/2026/Paris-Bordeaux/Bordeaux/IMG_20260128_165715.jpg', rotation: 0 },
+         { desc:'The clock tower', coords:[-0.571374, 44.835209], src:'data/IMG/2026/Paris-Bordeaux/Bordeaux/IMG_20260128_170705.jpg', rotation: 0 },
+         { desc:'At the bar', coords:[-0.568604, 44.835337], src:'data/IMG/2026/Paris-Bordeaux/Bordeaux/IMG_20260128_184113.jpg', rotation: 0 },
 	  ]
 	},
 	]
