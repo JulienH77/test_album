@@ -706,7 +706,7 @@ const travels = [
 	{
     year: 2026,
     id: "2026_bordeaux",
-    name: "January 2026 - Bordeaux",
+    name: "January 2026 - Paris/Bordeaux",
     cities: [
       {
 	  id: "bordeaux",
