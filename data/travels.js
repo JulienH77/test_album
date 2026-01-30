@@ -717,8 +717,17 @@ const travels = [
 	  flatPhotos: [
          { desc:'Waiting for her laundry', coords:[11.60667, 48.12429], src:'data/IMG/2025/Central Europe/Munich/IMG_20250712_221519.jpg', rotation: 245 },
 	  ]
-	}
-	]
+	},
+      {
+	  id: "paris",
+	  name: "Paris",
+	  lat: 48.8554,
+	  lng: 2.34443,
+	  zoom: 13,
+	  flatPhotos: [
+         { desc:'Waiting for her laundry', coords:[11.60667, 48.12429], src:'data/IMG/2025/Central Europe/Munich/IMG_20250712_221519.jpg', rotation: 245 },
+	  ]
+	},	]
 	}
 ];
 
