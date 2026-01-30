@@ -715,7 +715,22 @@ const travels = [
 	  lng: 2.34443,
 	  zoom: 13,
 	  flatPhotos: [
-         { desc:'Waiting for her laundry', coords:[11.60667, 48.12429], src:'data/IMG/2025/Central Europe/Munich/IMG_20250712_221519.jpg', rotation: 245 },
+         { desc:'The pyramid', coords:[2.335244, 48.860981], src:'data/IMG/2026/Paris-Bordeaux/Paris/IMG_20260127_122220.jpg', rotation: 0 },
+         { desc:'The big madam in the clouds', coords:[2.333357, 48.861335], src:'data/IMG/2026/Paris-Bordeaux/Paris/IMG_20260127_122719.jpg', rotation: 0 },
+         { desc:'Vercingétorix the goat', coords:[2.333419, 48.86279], src:'data/IMG/2026/Paris-Bordeaux/Paris/IMG_20260127_123313.jpg', rotation: 0 },
+         { desc:'Le musée du Louvre', coords:[2.333256, 48.86166], src:'data/IMG/2026/Paris-Bordeaux/Paris/IMG_20260127_141238.jpg', rotation: 0 },
+         { desc:'The new interior of Notre-Dame de Paris', coords:[2.349173, 48.8531], src:'data/IMG/2026/Paris-Bordeaux/Paris/IMG_20260127_144603.jpg', rotation: 0 },
+         { desc:'The new choir of Notre-Dame de Paris', coords:[2.349173, 48.8531], src:'data/IMG/2026/Paris-Bordeaux/Paris/IMG_20260127_144608.jpg', rotation: 0 },
+         { desc:'New interior of Notre-Dame de Paris', coords:[2.34999, 48.85308], src:'data/IMG/2026/Paris-Bordeaux/Paris/IMG_20260127_144820.jpg', rotation: 0 },
+         /*{ desc:'Notre-Dame de Paris', coords:[11.60667, 48.12429], src:'data/IMG/2026/Paris-Bordeaux/Paris/IMG_20260127_145000.jpg', rotation: 0 },
+         { desc:'Notre-Dame de Paris', coords:[11.60667, 48.12429], src:'data/IMG/2026/Paris-Bordeaux/Paris/IMG_20260127_145208.jpg', rotation: 0 },
+         { desc:'Notre-Dame de Paris', coords:[11.60667, 48.12429], src:'data/IMG/2026/Paris-Bordeaux/Paris/IMG_20260127_145607.jpg', rotation: 0 },
+         { desc:'Notre-Dame de Paris', coords:[11.60667, 48.12429], src:'data/IMG/2026/Paris-Bordeaux/Paris/IMG_20260127_145924.jpg', rotation: 0 },
+         { desc:'Jeanne d\'Arc in Notre-Dame de Paris', coords:[11.60667, 48.12429], src:'data/IMG/2026/Paris-Bordeaux/Paris/IMG_20260127_150127.jpg', rotation: 0 },
+         { desc:'Notre-Dame de Paris', coords:[11.60667, 48.12429], src:'data/IMG/2026/Paris-Bordeaux/Paris/IMG_20260127_150341.jpg', rotation: 0 },
+         { desc:'Notre-Dame de Paris', coords:[11.60667, 48.12429], src:'data/IMG/2026/Paris-Bordeaux/Paris/IMG_20260127_151302.jpg', rotation: 0 },
+         { desc:'Mister Grenouille was here', coords:[11.60667, 48.12429], src:'data/IMG/2026/Paris-Bordeaux/Paris/IMG_20260127_154819.jpg', rotation: 0 },*/
+
 	  ]
 	},
       {
