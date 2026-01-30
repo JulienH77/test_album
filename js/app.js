@@ -372,7 +372,7 @@ function toggleCity(city) {
   if (city.flatPhotos) {
     allItems = city.flatPhotos.map(p => ({
       ...p,
-      dateObj: extractDateFromFilename(p.src) 
+      dateObj: getDateFromFilename(p.src) 
     }));
   } else if (city.days) {
     allItems = city.days.flatMap(d => d.photos.map(p => ({...p, dateObj: new Date(d.date)})));
@@ -466,6 +466,16 @@ function toggleCity(city) {
 // ======================================================
 // 9. UTILITAIRES & CLOSE
 // ======================================================
+
+function getDateFromFilename(src) {
+  if (!src) return new Date();
+  const match = src.match(/IMG_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
+  if (match) {
+    return new Date(match[1], match[2] - 1, match[3], match[4], match[5], match[6]);
+  }
+  return new Date(); 
+}
+
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString("fr-FR", {
     day: "numeric",
@@ -484,13 +494,6 @@ function formatDateTime(dateStr) {
     minute: "2-digit"
   });
 }
-
-function extractDateFromFilename(src) {
-  const m = src.match(/IMG_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
-  if (!m) return null;
-  return new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}`);
-}
-
 
 function closeCities() {
   document.querySelectorAll(".city-gallery-container").forEach(el => {
@@ -519,7 +522,7 @@ function zoomOnCity(city) {
 // 10. PHOTO POPUP (FULLSCREEN)
 // ======================================================
 function openPhotoPopup(photo) {
-  const d = extractDateFromFilename(photo.src);
+  const d = getDateFromFilename(photo.src);
   const dateStr = d ? d.toLocaleString("fr-FR") : "";
 
   const html = `
