@@ -143,155 +143,95 @@ fetch("data/GEOJSON/TRAJETS_ALL_vacances_wgs.geojson")
   })
   .catch(err => console.error("Erreur chargement trajets :", err));
 
+
 // ======================================================
-// 6bis. UTILS TRAJETS (MultiLine, Offset, Couleur)
+// 6. FONCTIONS D'AFFICHAGE TRAJET (Style, Popup, Flèches)
 // ======================================================
 
-function flattenMultiLineString(geometry) {
-  if (!geometry) return [];
-  if (geometry.type === "LineString") {
-    return geometry.coordinates.map(c => [c[1], c[0]]);
-  }
-  if (geometry.type === "MultiLineString") {
-    return geometry.coordinates.flat().map(c => [c[1], c[0]]);
-  }
-  return [];
-}
-
-function getTrajetColor(type) {
+function trajetStyle(feature) {
   const colors = {
-    avion: "#00dbc5",
-    train: "#db0016",
-    bus: "#dbc500",
-    voiture: "#0016db",
-    bateau: "#0084db"
+    avion: "#00dbc5", train: "#db0016", bus: "#dbc500", voiture: "#0016db", bateau: "#0084db"
   };
-  return colors[type] || "#666";
+  return {
+    color: colors[feature.properties.trajet] || "#666",
+    weight: 4, // Un peu plus épais pour voir les flèches
+    opacity: 0.8
+  };
 }
 
-function getOffset(index) {
-  const step = 6;
-  return (index % 2 === 0 ? 1 : -1) * Math.ceil(index / 2) * step;
-}
-
-
 // ======================================================
-// 6. AFFICHAGE TRAJETS (ANIMÉS + SUPERPOSITION)
+// SHOW TRAJETS FOR ONE TRIP
 // ======================================================
-
 function showTrajetsForTrip(trip) {
-
-  // Nettoyage
+  // 1. On vide le groupe de calques existant (trajetLayer est défini en haut de votre fichier)
   trajetLayer.clearLayers();
-  polylineDecoratorLayer.clearLayers();
 
   if (!trajetsGeoJSON) {
-    console.error("GeoJSON trajets non chargé.");
+    console.error("Les données GeoJSON ne sont pas encore chargées.");
     return;
   }
 
-  // Filtrage par voyage
+  // 2. FILTRE : On compare l'ID du voyage (ou le name selon votre GeoJSON)
+  // Vérifiez si votre GeoJSON utilise l'ID (2025_china) ou le nom (May 2025 - China)
   const trajetsFiltres = trajetsGeoJSON.features.filter(
-    f => f.properties.voyage === trip.id || f.properties.voyage === trip.name
+    feature => feature.properties.voyage === trip.id || feature.properties.voyage === trip.name
   );
 
-  console.log("Trajets affichés :", trajetsFiltres.length);
+  console.log("Trajets trouvés pour " + trip.name + " :", trajetsFiltres.length);
 
-  trajetsFiltres.forEach((feature, index) => {
+  // 3. AJOUT À LA CARTE
+  const geojsonLayer = L.geoJSON(trajetsFiltres, {
+    style: function(feature) {
+      // On passe l'objet feature complet ici
+      return trajetStyle(feature);
+    },
+onEachFeature: function (feature, layer) {
+  const p = feature.properties;
 
-    const latlngs = flattenMultiLineString(feature.geometry);
-    if (!latlngs.length) return;
-
-    const p = feature.properties;
-    const color = getTrajetColor(p.trajet);
-    const offset = getOffset(index);
-
-    // === LIGNE PRINCIPALE (clic + popup)
-    const line = L.polyline(latlngs, {
-      color: color,
-      weight: 4,
-      opacity: 0.85,
-      offset: offset
-    });
-
-    // POPUP — VISUEL STRICTEMENT IDENTIQUE AU TIEN
-    const html = `
-      <div class="trajet-popup">
-        <div class="trajet-header ${p.trajet}">
-          ${p.trajet.toUpperCase()}
-        </div>
-
-        <div class="trajet-body">
-          <div class="trajet-line">
-            <span>Départ</span>
-            <span>${formatDateTime(p.date_deb)}</span>
-          </div>
-          <div class="trajet-line">
-            <span>Arrivée</span>
-            <span>${formatDateTime(p.date_fin)}</span>
-          </div>
-
-          <div class="trajet-separator"></div>
-
-          <div class="trajet-metrics">
-            <div>
-              <span class="label">Durée</span>
-              <span class="value">${p.duree}</span>
-            </div>
-            <div>
-              <span class="label">Distance</span>
-              <span class="value">${p.distanceKM} km</span>
-            </div>
-          </div>
-
-          <div class="trajet-voyage">${p.voyage}</div>
-        </div>
+  const html = `
+    <div class="trajet-popup">
+      <div class="trajet-header ${p.trajet}">
+        ${p.trajet.toUpperCase()}
       </div>
-    `;
 
-    line.bindPopup(html, {
-      maxWidth: 320,
-      className: "trajet-popup-wrapper"
-    });
+      <div class="trajet-body">
+        <div class="trajet-line">
+          <span>Départ</span>
+          <span>${formatDateTime(p.date_deb)}</span>
+        </div>
+        <div class="trajet-line">
+          <span>Arrivée</span>
+          <span>${formatDateTime(p.date_fin)}</span>
+        </div>
 
-    trajetLayer.addLayer(line);
+        <div class="trajet-separator"></div>
 
-    // === FLÈCHES DIRECTIONNELLES ANIMÉES (visuel seulement)
-    const decorator = L.polylineDecorator(line, {
-      patterns: [{
-        offset: '0%',
-        repeat: '14%',
-        symbol: L.Symbol.arrowHead({
-          pixelSize: 8,
-          polygon: false,
-          pathOptions: {
-            stroke: true,
-            color: color,
-            weight: 2
-          }
-        })
-      }]
-    });
+        <div class="trajet-metrics">
+          <div>
+            <span class="label">Durée</span>
+            <span class="value">${p.duree}</span>
+          </div>
+          <div>
+            <span class="label">Distance</span>
+            <span class="value">${p.distanceKM} km</span>
+          </div>
+        </div>
 
-    polylineDecoratorLayer.addLayer(decorator);
+        <div class="trajet-voyage">${p.voyage}</div>
+      </div>
+    </div>
+  `;
 
-    // === ANIMATION
-    let animOffset = 0;
-    const interval = setInterval(() => {
-      animOffset = (animOffset + 1) % 100;
-      decorator.setPatterns([{
-        offset: animOffset + '%',
-        repeat: '14%',
-        symbol: decorator.options.patterns[0].symbol
-      }]);
-    }, 90);
-
-    decorator._interval = interval;
+  layer.bindPopup(html, {
+    maxWidth: 320,
+    className: "trajet-popup-wrapper"
   });
 }
+  });
 
-
-
+  // On ajoute le geojson au groupe trajetLayer
+  trajetLayer.addLayer(geojsonLayer);
+}
 
 // ======================================================
 // 7. GESTION DU MENU DÉROULANT & CHARGEMENT VOYAGE
