@@ -443,34 +443,33 @@ function toggleCity(city) {
      return d.charAt(0).toUpperCase() + d.slice(1);
   }))].filter(d => d !== null);
 
-  const galleryHTML = uniqueDates.map(dateStr => `
-    <div class="day-block">
-      <div class="day-title">${dateStr}</div>
-      <div class="photo-grid-2-cols">
-        ${photosByDay[dateStr].map(photo => {
-			  const isBlurred = photo.withEx && !state.showExes;
-			  const blurClass = isBlurred ? 'photo-blurred' : '';
-			  const clickAction = isBlurred 
-				? '' 
-				: `onclick='openPhotoPopup(${JSON.stringify(photo).replace(/'/g, "&#39;")})'`;
+const galleryHTML = uniqueDates.map(dateStr => `
+  <div class="day-block">
+    <div class="day-title">${dateStr}</div>
+    <div class="photo-grid-2-cols">
+      ${photosByDay[dateStr].map(photo => {
+        const isBlurred = photo.withEx && !state.showExes;
+        const blurClass = isBlurred ? 'photo-blurred' : '';
+        const clickAction = isBlurred 
+          ? '' 
+          : `onclick='openPhotoPopup(${JSON.stringify(photo).replace(/'/g, "&#39;")})'`;
 
-			  return `
-				<div class="photo-item img-wrapper">
-				  <img 
-					src="${photo.src}" 
-					class="${blurClass}"
-					loading="lazy"
-					${clickAction}
-					style="cursor:${isBlurred ? 'default' : 'pointer'}"
-				  >
-				  ${photo.desc ? `<div class="photo-desc">${photo.desc}</div>` : ''}
-				</div>
-			  `;
-			}).join('')}
+        return `
+          <div class="photo-item img-wrapper">
+            <img 
+              src="${photo.src}" 
+              class="${blurClass}"
+              loading="lazy"
+              ${clickAction}
+              style="cursor:${isBlurred ? 'default' : 'pointer'}"
             >
             ${photo.desc ? `<div class="photo-desc">${photo.desc}</div>` : ''}
           </div>
-        `).join('')}
+        `;
+      }).join('')}
+    </div>
+  </div>
+`).join('');
 
   galleryDiv.innerHTML = galleryHTML;
   
