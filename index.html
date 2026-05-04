@@ -23,16 +23,20 @@
     <!-- SECTION A : VOYAGES -->
     <section id="trip-section">
       <h2 style="margin-top:-0.5em;">Voyages</h2>
-	<div class="custom-select-wrapper">
-		<div class="custom-select">
-			<div class="custom-select-trigger">
-				<span id="selected-trip-label">Sélectionner un voyage...</span>
-				<span class="arrow">▼</span>
-			</div>
-			<div class="custom-options" id="custom-options-container">
-				</div>
-		</div>
-	</div>
+	  <div style="margin-bottom: 15px; font-size: 0.85em; display: flex; align-items: center; gap: 8px; background: #eee; padding: 8px; border-radius: 6px;">
+		<input type="checkbox" id="toggle-ex" style="cursor:pointer">
+		<label for="toggle-ex" style="cursor:pointer; color: #444; font-weight: 500;">Afficher les photos avec mon Ex</label>
+	  </div>
+	  <div class="custom-select-wrapper">
+	  	<div class="custom-select">
+	  		<div class="custom-select-trigger">
+	  			<span id="selected-trip-label">Sélectionner un voyage...</span>
+	  			<span class="arrow">▼</span>
+	  		</div>
+	  		<div class="custom-options" id="custom-options-container">
+	  			</div>
+	  	</div>
+	  </div>
     </section>
 
     <!-- SECTION B : CONTENU CONTEXTUEL -->
