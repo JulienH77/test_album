@@ -471,9 +471,6 @@ function toggleCity(city) {
             ${photo.desc ? `<div class="photo-desc">${photo.desc}</div>` : ''}
           </div>
         `).join('')}
-      </div>
-    </div>
-  `).join('');
 
   galleryDiv.innerHTML = galleryHTML;
   
