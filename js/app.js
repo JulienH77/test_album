@@ -3,7 +3,8 @@
 // ======================================================
 const state = {
   selectedTrip: null,
-  selectedCity: null
+  selectedCity: null,
+  showExes: false
 };
 
 let trajetsGeoJSON = null; // Stockera les données brutes
@@ -380,7 +381,10 @@ function toggleCity(city) {
 
   // 2. Séparer Hôtels / Photos
   const hotels = allItems.filter(item => item.type === 'hotel');
-  const photos = allItems.filter(item => item.type !== 'hotel');
+  /*const photos = allItems.filter(item => item.type !== 'hotel');*/
+  // NOUVELLE LIGNE : On filtre les photos qui ne sont pas des hôtels ET 
+  // (qui n'ont pas le tag withEx OU ALORS le mode showExes est activé)
+  const photos = allItems.filter(item => item.type !== 'hotel' && (!item.withEx || state.showExes));
 
   // 3. Afficher les HOTELS (Z-Index élevé)
   hotels.forEach(h => {
@@ -568,6 +572,54 @@ map.on('zoomend', function() {
 if(map.getZoom() < 5) {
     document.getElementById('map').classList.add('map-zoomed-out');
 }
+
+
+
+
+
+
+
+
+// ======================================================
+// EASTER EGG : TOGGLE PHOTOS EX
+// ======================================================
+let secretClickCount = 0;
+let secretClickTimer;
+
+// On cible le titre "Voyages" de la barre latérale
+const titleElement = document.querySelector('#trip-section h2');
+if (titleElement) {
+  titleElement.style.cursor = "default"; // Pour ne pas éveiller les soupçons avec un curseur cliquable
+  
+  titleElement.addEventListener('click', () => {
+    secretClickCount++;
+    clearTimeout(secretClickTimer);
+    
+    // Réinitialise le compteur après 1 seconde
+    secretClickTimer = setTimeout(() => {
+      secretClickCount = 0;
+    }, 1000);
+
+    // Au bout de 3 clics rapides
+    if (secretClickCount === 3) {
+      state.showExes = !state.showExes; // On inverse l'état
+      secretClickCount = 0; // On reset le compteur
+      
+      // Petit feedback discret pour confirmer (tu peux l'enlever plus tard si tu veux que ce soit 100% invisible)
+      alert(state.showExes ? "Mode souvenirs complet activé 🔓" : "Mode souvenirs filtré activé 🔒");
+      
+      // Si une ville est actuellement ouverte, on la recharge automatiquement pour appliquer le filtre
+      if (state.selectedCity) {
+        const currentCity = state.selectedCity;
+        state.selectedCity = null; // Astuce pour forcer la fonction toggleCity à recharger la ville
+        toggleCity(currentCity);
+      }
+    }
+  });
+}
+
+
+
 
 // ======================================================
 // 12. INITIALISATION FINALE
