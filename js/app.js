@@ -417,7 +417,11 @@ function toggleCity(city) {
           zIndexOffset: 500 // En dessous
       });
       
-      marker.on("click", () => openPhotoPopup(photo));
+      if (photo.withEx && !state.showExes) {
+		  marker.bindPopup("<b>Contenu privé 🔒</b><br>Coche la case pour voir.");
+		} else {
+		  marker.on("click", () => openPhotoPopup(photo));
+		}
       photoLayer.addLayer(marker);
   });
 
@@ -443,12 +447,26 @@ function toggleCity(city) {
     <div class="day-block">
       <div class="day-title">${dateStr}</div>
       <div class="photo-grid-2-cols">
-        ${photosByDay[dateStr].map(photo => `
-          <div class="photo-item">
-            <img 
-              src="${photo.src}" 
-              loading="lazy" 
-              onclick='openPhotoPopup(${JSON.stringify(photo).replace(/'/g, "&#39;")})'
+        ${photosByDay[dateStr].map(photo => {
+			  const isBlurred = photo.withEx && !state.showExes;
+			  const blurClass = isBlurred ? 'photo-blurred' : '';
+			  const clickAction = isBlurred 
+				? '' 
+				: `onclick='openPhotoPopup(${JSON.stringify(photo).replace(/'/g, "&#39;")})'`;
+
+			  return `
+				<div class="photo-item img-wrapper">
+				  <img 
+					src="${photo.src}" 
+					class="${blurClass}"
+					loading="lazy"
+					${clickAction}
+					style="cursor:${isBlurred ? 'default' : 'pointer'}"
+				  >
+				  ${photo.desc ? `<div class="photo-desc">${photo.desc}</div>` : ''}
+				</div>
+			  `;
+			}).join('')}
             >
             ${photo.desc ? `<div class="photo-desc">${photo.desc}</div>` : ''}
           </div>
@@ -576,10 +594,7 @@ if(map.getZoom() < 5) {
 
 
 
-
-
-
-
+/*
 // ======================================================
 // EASTER EGG : TOGGLE PHOTOS EX
 // ======================================================
@@ -616,9 +631,25 @@ if (titleElement) {
       }
     }
   });
+}*/
+
+
+
+
+const toggleExCheckbox = document.getElementById('toggle-ex');
+
+if (toggleExCheckbox) {
+  toggleExCheckbox.addEventListener('change', (e) => {
+    state.showExes = e.target.checked;
+
+    // Recharge la ville ouverte pour appliquer le flou
+    if (state.selectedCity) {
+      const currentCity = state.selectedCity;
+      state.selectedCity = null;
+      toggleCity(currentCity);
+    }
+  });
 }
-
-
 
 
 // ======================================================
