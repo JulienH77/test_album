@@ -569,7 +569,7 @@ body {
 .img-wrapper {
   position: relative;
   overflow: hidden;
-  background: #000; /* Fond noir pour le flou */
+  /*background: #000;*/ /* Fond noir pour le flou */
 }
 
 /* La classe qui floute l'image */
