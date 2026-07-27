@@ -18,13 +18,13 @@ const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: 'Julien Houziaux | OSM'
 });
 
-const googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
   maxZoom: 20,
   subdomains:['mt0','mt1','mt2','mt3'],
   attribution: 'Julien Houziaux | Google Satellite'
 });
 
-const googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+const googleStreets = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
   maxZoom: 20,
   subdomains:['mt0','mt1','mt2','mt3'],
   attribution: 'Julien Houziaux | Google Maps'
@@ -590,22 +590,22 @@ if(map.getZoom() < 5) {
 
 
 
-/*
 // ======================================================
 // EASTER EGG : TOGGLE PHOTOS EX
 // ======================================================
 let secretClickCount = 0;
 let secretClickTimer;
 
-// On cible le titre "Voyages" de la barre latérale
+// On cible le titre "Voyages" de la barre latérale : 3 clics rapides dessus
+// inversent l'affichage des photos "Ex". Aucun indice visuel ailleurs sur la page.
 const titleElement = document.querySelector('#trip-section h2');
 if (titleElement) {
   titleElement.style.cursor = "default"; // Pour ne pas éveiller les soupçons avec un curseur cliquable
-  
+
   titleElement.addEventListener('click', () => {
     secretClickCount++;
     clearTimeout(secretClickTimer);
-    
+
     // Réinitialise le compteur après 1 seconde
     secretClickTimer = setTimeout(() => {
       secretClickCount = 0;
@@ -615,10 +615,9 @@ if (titleElement) {
     if (secretClickCount === 3) {
       state.showExes = !state.showExes; // On inverse l'état
       secretClickCount = 0; // On reset le compteur
-      
-      // Petit feedback discret pour confirmer (tu peux l'enlever plus tard si tu veux que ce soit 100% invisible)
-      alert(state.showExes ? "Mode souvenirs complet activé 🔓" : "Mode souvenirs filtré activé 🔒");
-      
+
+      showToast(state.showExes ? "🔓 Souvenirs complets" : "🔒 Mode filtré");
+
       // Si une ville est actuellement ouverte, on la recharge automatiquement pour appliquer le filtre
       if (state.selectedCity) {
         const currentCity = state.selectedCity;
@@ -627,24 +626,19 @@ if (titleElement) {
       }
     }
   });
-}*/
+}
 
-
-
-
-const toggleExCheckbox = document.getElementById('toggle-ex');
-
-if (toggleExCheckbox) {
-  toggleExCheckbox.addEventListener('change', (e) => {
-    state.showExes = e.target.checked;
-
-    // Recharge la ville ouverte pour appliquer le flou
-    if (state.selectedCity) {
-      const currentCity = state.selectedCity;
-      state.selectedCity = null;
-      toggleCity(currentCity);
-    }
-  });
+// Petite notification discrète (remplace l'ancien alert(), trop intrusif)
+function showToast(message) {
+  const toast = document.createElement('div');
+  toast.className = 'secret-toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('visible'));
+  setTimeout(() => {
+    toast.classList.remove('visible');
+    setTimeout(() => toast.remove(), 400);
+  }, 1800);
 }
 
 
